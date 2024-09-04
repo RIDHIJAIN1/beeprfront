@@ -2,10 +2,10 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import Alert from '@mui/material/Alert';
+// import Alert from '@mui/material/Alert';
 
 import { paths } from '@/paths';
-import { logger } from '@/lib/default-logger';
+// import { logger } from '@/lib/default-logger';
 import { useUser } from '@/hooks/use-user';
 
 export interface AuthGuardProps {
@@ -15,42 +15,32 @@ export interface AuthGuardProps {
 export function AuthGuard({ children }: AuthGuardProps): React.JSX.Element | null {
   const router = useRouter();
   const { user, error, isLoading } = useUser();
-  const [isChecking, setIsChecking] = React.useState<boolean>(true);
 
-  const checkPermissions = React.useCallback(async (): Promise<void> => {
+  React.useEffect(() => {
+    console.debug('AuthGuard: Checking user...', { user, error, isLoading });
+
     if (isLoading) {
       return;
     }
 
     if (error) {
-      console.error('[AuthGuard]: An error occurred:', error);
-      setIsChecking(false);
+      console.error('AuthGuard: Error occurred', error);
       return;
     }
 
     if (!user) {
-      logger.debug('[AuthGuard]: User is not logged in, redirecting to sign in');
+      console.debug('AuthGuard: User is not logged in, redirecting...');
       router.replace(paths.auth.signIn);
       return;
     }
+    
+    console.debug('AuthGuard: User is logged in, allowing access');
+  }, [user, error, isLoading, router]);
 
-    setIsChecking(false);
-  }, [isLoading, error, user, router]);
-
-  React.useEffect(() => {
-    checkPermissions().catch((err) => {
-      console.error('Error in checkPermissions:', err);
-    });
-  }, [checkPermissions]);
-
-  if (isChecking) {
-    console.log('AuthGuard is checking permissions...');
-    return null;
-  }
-
-  if (error) {
-    return <Alert color="error">An error occurred: {JSON.stringify(error)}</Alert>;
+  if (isLoading || !user) {
+    return null; // Or a loading spinner
   }
 
   return <React.Fragment>{children}</React.Fragment>;
 }
+

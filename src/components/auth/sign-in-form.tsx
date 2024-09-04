@@ -18,8 +18,9 @@ import { EyeSlash as EyeSlashIcon } from '@phosphor-icons/react/dist/ssr/EyeSlas
 import { Controller, useForm } from 'react-hook-form';
 import { z as zod } from 'zod';
 
-import { paths } from '@/paths'; // Update this according to your paths configuration
-import { useUser } from '@/hooks/use-user'; // Ensure this hook is properly implemented
+import { paths } from '@/paths';
+import { authClient } from '@/lib/auth/client';
+import { useUser } from '@/hooks/use-user';
 
 const schema = zod.object({
   email: zod.string().min(1, { message: 'Email is required' }).email(),
@@ -28,14 +29,14 @@ const schema = zod.object({
 
 type Values = zod.infer<typeof schema>;
 
-const defaultValues = { email: '', password: '' } satisfies Values;
+const defaultValues = { email: 'sofia@devias.io', password: 'Secret1' } satisfies Values;
 
 export function SignInForm(): React.JSX.Element {
   const router = useRouter();
 
   const { checkSession } = useUser();
 
-  const [showPassword, setShowPassword] = React.useState<boolean>(false);
+  const [showPassword, setShowPassword] = React.useState<boolean>();
 
   const [isPending, setIsPending] = React.useState<boolean>(false);
 
@@ -50,46 +51,27 @@ export function SignInForm(): React.JSX.Element {
     async (values: Values): Promise<void> => {
       setIsPending(true);
 
-      try {
-        const response = await fetch('http://localhost:3000/v1/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(values),
-        });
+      const { error } = await authClient.signInWithPassword(values);
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          setError('root', { type: 'server', message: data.message || 'Login failed' });
-          setIsPending(false);
-          return;
-        }
-
-        // Assuming the backend returns a token or user data on successful login
-        // Store the token in localStorage or context and update the user state
-
-        // Refresh the auth state
-        await checkSession?.();
-
-        // After refresh, GuestGuard will handle the redirect
-        router.push('/dashboard'); 
-      } catch (error) {
-        setError('root', { type: 'server', message: 'An unexpected error occurred' });
-      } finally {
+      if (error) {
+        setError('root', { type: 'server', message: error });
         setIsPending(false);
+        return;
       }
+
+      // Refresh the auth state
+      await checkSession?.();
+
+      // UserProvider, for this case, will not refresh the router
+      // After refresh, GuestGuard will handle the redirect
+      router.refresh();
     },
     [checkSession, router, setError]
   );
 
   return (
-    <Stack
-      sx={{ minHeight: '100vh', justifyContent: 'center', alignItems: 'center' }}
-      spacing={4}
-    >
-      <Stack spacing={1} sx={{ width: '100%', maxWidth: 400 }}>
+    <Stack spacing={4}>
+      <Stack spacing={1}>
         <Typography variant="h4">Sign in</Typography>
         <Typography color="text.secondary" variant="body2">
           Don&apos;t have an account?{' '}
@@ -98,13 +80,13 @@ export function SignInForm(): React.JSX.Element {
           </Link>
         </Typography>
       </Stack>
-      <form onSubmit={handleSubmit(onSubmit)} style={{ width: '100%', maxWidth: 400 }}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2}>
           <Controller
             control={control}
             name="email"
             render={({ field }) => (
-              <FormControl error={Boolean(errors.email)} fullWidth>
+              <FormControl error={Boolean(errors.email)}>
                 <InputLabel>Email address</InputLabel>
                 <OutlinedInput {...field} label="Email address" type="email" />
                 {errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
@@ -115,7 +97,7 @@ export function SignInForm(): React.JSX.Element {
             control={control}
             name="password"
             render={({ field }) => (
-              <FormControl error={Boolean(errors.password)} fullWidth>
+              <FormControl error={Boolean(errors.password)}>
                 <InputLabel>Password</InputLabel>
                 <OutlinedInput
                   {...field}
@@ -151,14 +133,12 @@ export function SignInForm(): React.JSX.Element {
             </Link>
           </div>
           {errors.root ? <Alert color="error">{errors.root.message}</Alert> : null}
-          <Button disabled={isPending} type="submit" variant="contained" fullWidth>
+          <Button disabled={isPending} type="submit" variant="contained">
             Sign in
           </Button>
         </Stack>
       </form>
-      <Alert color="warning">
-        Use a valid email and password to sign in.
-      </Alert>
+     
     </Stack>
   );
 }

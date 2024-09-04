@@ -55,15 +55,26 @@ class AuthClient {
     const { email, password } = params;
 
     // Make API request
+    try {
+      const response = await fetch('http://localhost:3000/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      });
 
-    // We do not handle the API, so we'll check if the credentials match with the hardcoded ones.
-    if (email !== 'sofia@devias.io' || password !== 'Secret1') {
-      return { error: 'Invalid credentials' };
+      const data = await response.json();
+      console.log(data)
+      if (!response.ok) {
+        return { error: 'Invalid credentials' };
+      }
+    } catch (error) {
+      return { error: "error" };
     }
 
     const token = generateToken();
     localStorage.setItem('custom-auth-token', token);
-
     return {};
   }
 
