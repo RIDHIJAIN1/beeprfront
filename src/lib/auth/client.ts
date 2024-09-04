@@ -2,6 +2,8 @@
 
 import type { User } from '@/types/user';
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 function generateToken(): string {
   const arr = new Uint8Array(12);
   window.crypto.getRandomValues(arr);
@@ -42,7 +44,7 @@ class AuthClient {
 
     // We do not handle the API, so we'll just generate a token and store it in localStorage.
     const token = generateToken();
-    localStorage.setItem('custom-auth-token', token);
+    localStorage.setItem('auth-access-token', token);
 
     return {};
   }
@@ -56,7 +58,7 @@ class AuthClient {
 
     // Make API request
     try {
-      const response = await fetch('http://localhost:3000/v1/auth/login', {
+      const response = await fetch(`${BACKEND_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,16 +67,15 @@ class AuthClient {
       });
 
       const data = await response.json();
-      console.log(data)
       if (!response.ok) {
         return { error: 'Invalid credentials' };
       }
+      const token = data.tokens.access.token;
+      localStorage.setItem('auth-access-token', token);
     } catch (error) {
       return { error: "error" };
     }
 
-    const token = generateToken();
-    localStorage.setItem('custom-auth-token', token);
     return {};
   }
 
@@ -87,21 +88,32 @@ class AuthClient {
   }
 
   async getUser(): Promise<{ data?: User | null; error?: string }> {
-    // Make API request
-
     // We do not handle the API, so just check if we have a token in localStorage.
-    const token = localStorage.getItem('custom-auth-token');
+    let token = localStorage.getItem('auth-access-token');
 
     if (!token) {
       return { data: null };
     }
 
-    return { data: user };
+    // Make API request
+    const response = await fetch(`${BACKEND_URL}/auth/verify-token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      localStorage.removeItem('auth-access-token');
+      return { data: null, error: data.message || "Something went wrong!" };
+    }
+
+    return { data: data };
   }
 
   async signOut(): Promise<{ error?: string }> {
-    localStorage.removeItem('custom-auth-token');
-
+    localStorage.removeItem('auth-access-token');
     return {};
   }
 }
