@@ -19,6 +19,9 @@ import { useSelection } from '@/hooks/use-selection';
 
 function noop(): void {
   // do nothing
+
+
+  
 }
 
 export interface Customer {
@@ -26,7 +29,7 @@ export interface Customer {
   // avatar: string;
   name: string;
   email: string;
-  username: string;
+  password: string;
   // address: { city: string; state: string; country: string; street: string };
   // phone: string;
   createdAt: Date;
@@ -37,6 +40,7 @@ interface CustomersTableProps {
   page?: number;
   rows?: Customer[];
   rowsPerPage?: number;
+
 }
 
 export function CustomersTable({
@@ -75,7 +79,7 @@ export function CustomersTable({
               </TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Email</TableCell>
-              <TableCell>Location</TableCell>
+              <TableCell>Password</TableCell>
               <TableCell>Phone</TableCell>
               <TableCell>Signed Up</TableCell>
             </TableRow>
@@ -105,7 +109,8 @@ export function CustomersTable({
                     </Stack>
                   </TableCell>
                   <TableCell>{row.email}</TableCell>
-                  <TableCell>{row.username}</TableCell>
+                  <TableCell>{row.password}</TableCell>
+               
                   {/* <TableCell>
                     {row.address.city}, {row.address.state}, {row.address.country}
                   </TableCell> */}

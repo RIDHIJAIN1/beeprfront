@@ -1,6 +1,11 @@
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-export async function authenticatedApiCall(route: string, method: string, contentType: string = "application/json", queryParams: Record<string, any> = null, bodyParams: Record<string, any> = null): Promise<{ data: any; error?: string }> {
+export async function authenticatedApiCall(
+    route: string, 
+    method: string, 
+    contentType: string = "application/json", 
+    queryParams: Record<string, any> = null, 
+    bodyParams: Record<string, any> = null): Promise<{ data: any; error?: string }> {
     const token = localStorage.getItem('auth-access-token');
     if (!token) return { data: null, error: "Auth token unavailable" };
 
