@@ -1,7 +1,5 @@
 'use client';
 
-import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Checkbox from '@mui/material/Checkbox';
@@ -15,6 +13,7 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import dayjs from 'dayjs';
+import * as React from 'react';
 
 import { useSelection } from '@/hooks/use-selection';
 
@@ -24,11 +23,12 @@ function noop(): void {
 
 export interface Customer {
   id: string;
-  avatar: string;
+  // avatar: string;
   name: string;
   email: string;
-  address: { city: string; state: string; country: string; street: string };
-  phone: string;
+  username: string;
+  // address: { city: string; state: string; country: string; street: string };
+  // phone: string;
   createdAt: Date;
 }
 
@@ -100,15 +100,16 @@ export function CustomersTable({
                   </TableCell>
                   <TableCell>
                     <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
-                      <Avatar src={row.avatar} />
+                      {/* <Avatar src={row.avatar} /> */}
                       <Typography variant="subtitle2">{row.name}</Typography>
                     </Stack>
                   </TableCell>
                   <TableCell>{row.email}</TableCell>
-                  <TableCell>
+                  <TableCell>{row.username}</TableCell>
+                  {/* <TableCell>
                     {row.address.city}, {row.address.state}, {row.address.country}
-                  </TableCell>
-                  <TableCell>{row.phone}</TableCell>
+                  </TableCell> */}
+                  {/* <TableCell>{row.phone}</TableCell> */}
                   <TableCell>{dayjs(row.createdAt).format('MMM D, YYYY')}</TableCell>
                 </TableRow>
               );
