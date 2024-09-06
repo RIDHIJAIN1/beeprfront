@@ -1,6 +1,7 @@
 'use client';
-
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useUser } from '@/hooks/use-user';
+import { authClient } from '@/lib/auth/client';
+import { paths } from '@/paths';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import FormControl from '@mui/material/FormControl';
@@ -17,58 +18,39 @@ import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z as zod } from 'zod';
-
-import { useUser } from '@/hooks/use-user';
-import { authClient } from '@/lib/auth/client';
-import { paths } from '@/paths';
-
 const schema = zod.object({
   email: zod.string().min(1, { message: 'Email is required' }).email(),
   password: zod.string().min(1, { message: 'Password is required' }),
 });
-
 type Values = zod.infer<typeof schema>;
-
-const defaultValues = { email: 'sofia@devias.io', password: 'Secret1' } satisfies Values;
-
 export function SignInForm(): React.JSX.Element {
   const router = useRouter();
-
   const { checkSession } = useUser();
-
   const [showPassword, setShowPassword] = React.useState<boolean>();
-
   const [isPending, setIsPending] = React.useState<boolean>(false);
-
   const {
     control,
     handleSubmit,
     setError,
     formState: { errors },
-  } = useForm<Values>({ defaultValues, resolver: zodResolver(schema) });
-
+  } = useForm<Values>();
   const onSubmit = React.useCallback(
     async (values: Values): Promise<void> => {
       setIsPending(true);
-
       const { error } = await authClient.signInWithPassword(values);
-
       if (error) {
         setError('root', { type: 'server', message: error });
         setIsPending(false);
         return;
       }
-
       // Refresh the auth state
       await checkSession?.();
-
       // UserProvider, for this case, will not refresh the router
       // After refresh, GuestGuard will handle the redirect
       router.refresh();
     },
     [checkSession, router, setError]
   );
-
   return (
     <Stack spacing={4}>
       <Stack spacing={1}>
@@ -138,7 +120,6 @@ export function SignInForm(): React.JSX.Element {
           </Button>
         </Stack>
       </form>
-
     </Stack>
   );
 }

@@ -1,8 +1,6 @@
 "use client";
-import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 // import type { Metadata } from 'next';
 import * as React from 'react';
 
@@ -38,11 +36,11 @@ export default function Page(): React.JSX.Element {
         <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
           <Typography variant="h4">Users</Typography>
         </Stack>
-        <div>
+        {/* <div>
           <Button startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained">
             Add
           </Button>
-        </div>
+        </div> */}
       </Stack>
       <CustomersFilters />
       <CustomersTable
