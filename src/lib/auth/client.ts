@@ -80,30 +80,29 @@ class AuthClient {
   }
 
   async getUser(): Promise<{ data?: User | null; error?: string }> {
-    // We do not handle the API, so just check if we have a token in localStorage.
     let token = localStorage.getItem('auth-access-token');
-
     if (!token) {
       return { data: null };
     }
-
-    // Make API request
-    const response = await fetch(`${BACKEND_URL}/auth/verify-token`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      localStorage.removeItem('auth-access-token');
-      return { data: null, error: data.message || "Something went wrong!" };
+    try {
+      const response = await fetch(`${BACKEND_URL}/auth/verify-token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        localStorage.removeItem('auth-access-token');
+        const errorMessage = response.status === 401 ? "Token is invalid or expired." : data.message || "Something went wrong!";
+        return { data: null, error: errorMessage };
+      }
+      return { data: data };
+    } catch (error) {
+      return { data: null, error: "Network error occurred." };
     }
-
-    return { data: data };
   }
-
   async signOut(): Promise<{ error?: string }> {
     localStorage.removeItem('auth-access-token');
     return {};

@@ -1,6 +1,5 @@
 "use client";
 import { useSelection } from '@/hooks/use-selection';
-import { Button } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
@@ -14,18 +13,21 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import dayjs from 'dayjs';
 import * as React from 'react';
-import { MdDelete } from "react-icons/md";
+import { TiTick } from "react-icons/ti";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 function noop(): void {
     // do nothing
 }
-
+export interface User {
+    name: string;
+    email: string;
+}
 export interface Seller {
     id: string; // This should match the _id from your API response.
     street: string;
-    user: string;
+    user: User;
     name: string;
     email: string;
     createdAt: Date; // You will need to ensure this is provided in your API response.
@@ -44,7 +46,6 @@ interface SellersTableProps {
     page?: number;
     rows?: Seller[];
     rowsPerPage?: number;
-    onApprove;
 }
 
 export function SellersTable({
@@ -52,7 +53,6 @@ export function SellersTable({
     rows = [],
     page = 0,
     rowsPerPage = 0,
-    onApprove,
 }: SellersTableProps): React.JSX.Element {
     const rowIds = React.useMemo(() => {
         return rows.map((seller) => seller.id);
@@ -75,8 +75,7 @@ export function SellersTable({
                             <TableCell>Photo ID</TableCell>
                             <TableCell>Cannabis License</TableCell>
                             <TableCell>Resellers Permit</TableCell>
-                            <TableCell>Approval Status</TableCell>
-                            <TableCell>Delete</TableCell>
+                            <TableCell>Approve</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -97,40 +96,21 @@ export function SellersTable({
                                     <TableCell>{row.paymentOption}</TableCell> {/* Display payment option */}
                                     <TableCell>{dayjs(row.createdAt).format('MMM D, YYYY')}</TableCell>
                                     <TableCell>
-                                        <img
-                                            src={`${BACKEND_URL}/${row.photoId}`} // Construct the image URL
-                                            alt="Seller Photo"
-                                            style={{ width: '50px', height: '50px', borderRadius: '50%' }} // Style the image
-                                        />
+                                        <a className='text-sky-600' href={`${BACKEND_URL}/${row.photoId}`}>Link</a>
                                     </TableCell>
                                     <TableCell>
-                                        <img
-                                            src={`${BACKEND_URL}/${row.cannabisLicense}`} // Construct the image URL
-                                            alt="Cannabis License"
-                                            style={{ width: '50px', height: '50px', borderRadius: '50%' }} // Style the image
-                                        />
+                                        <a className='text-sky-600' href={`${BACKEND_URL}/${row.cannabisLicense}`}>Link</a>
                                     </TableCell>
                                     <TableCell>
-                                        <img
-                                            src={`${BACKEND_URL}/${row.resellersPermit}`} // Construct the image URL
-                                            alt="Resellers Permit"
-                                            style={{ width: '50px', height: '50px', borderRadius: '50%' }} // Style the image
-                                        />
+                                        <a className='text-sky-600' href={`${BACKEND_URL}/${row.resellersPermit}`}>Link</a>
                                     </TableCell>
-                                    <TableCell>
-                                        {row.isApproved ? (
-                                            <Button onClick={() => onApprove(row.id, row.isApproved)} variant="outlined" color="secondary">
-                                                Disapprove
-                                            </Button>
-                                        ) : (
-                                            <Button onClick={() => onApprove(row.id, row.isApproved)} variant="outlined" color="primary">
-                                                Approve
-                                            </Button>
-                                        )}
+                                    <TableCell sx={{ fontSize: '30px' }}>
+                                        <div className='flex gap-3'>
+                                            <TiTick className='shadow-md text-green-500' />
+                                            <TiTick className='shadow-md text-red-500' />
+                                        </div>
                                     </TableCell>
-                                    <TableCell style={{ fontSize: '30px' }}>
-                                        <MdDelete />
-                                    </TableCell>
+
                                 </TableRow>
                             );
                         })}

@@ -1,5 +1,3 @@
-import * as React from 'react';
-import type { Metadata } from 'next';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -7,15 +5,17 @@ import { Download as DownloadIcon } from '@phosphor-icons/react/dist/ssr/Downloa
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { Upload as UploadIcon } from '@phosphor-icons/react/dist/ssr/Upload';
 import dayjs from 'dayjs';
+import type { Metadata } from 'next';
+import * as React from 'react';
 
+import { ProductFilters } from '@/components/dashboard/product/product-filter';
+import type { Product } from '@/components/dashboard/product/product-table';
+import { ProductsTable } from '@/components/dashboard/product/product-table';
 import { config } from '@/config';
-import { SellersFilters } from '@/components/dashboard/seller/sellerfilter';
-import { SellersTable } from '@/components/dashboard/seller/sellertable';
-import type { Seller } from '@/components/dashboard/seller/sellertable';
 
-export const metadata = { title: `Sellers | Dashboard | ${config.site.name}` } satisfies Metadata;
+export const metadata = { title: `Products | Dashboard | ${config.site.name}` } satisfies Metadata;
 
-const sellers = [
+const Products = [
   {
     id: 'USR-010',
     name: 'Alcides Antonio',
@@ -107,13 +107,13 @@ const sellers = [
     address: { city: 'San Diego', country: 'USA', state: 'California', street: '75247' },
     createdAt: dayjs().subtract(2, 'hours').toDate(),
   },
-] satisfies Seller[];
+] satisfies Product[];
 
 export default function Page(): React.JSX.Element {
   const page = 0;
   const rowsPerPage = 5;
 
-  const paginatedCustomers = applyPagination(sellers, page, rowsPerPage);
+  const paginatedCustomers = applyPagination(Products, page, rowsPerPage);
 
   return (
     <Stack spacing={3}>
@@ -135,8 +135,8 @@ export default function Page(): React.JSX.Element {
           </Button>
         </div>
       </Stack>
-      <SellersFilters />
-      <SellersTable
+      <ProductFilters />
+      <ProductsTable
         count={paginatedCustomers.length}
         page={page}
         rows={paginatedCustomers}
@@ -146,6 +146,6 @@ export default function Page(): React.JSX.Element {
   );
 }
 
-function applyPagination(rows: Seller[], page: number, rowsPerPage: number): Seller[] {
+function applyPagination(rows: Product[], page: number, rowsPerPage: number): Product[] {
   return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 }

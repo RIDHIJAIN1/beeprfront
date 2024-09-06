@@ -1,7 +1,7 @@
 "use client";
-import { SellersFilters } from '@/components/dashboard/seller/sellerfilter';
-import type { Seller } from '@/components/dashboard/seller/sellertable';
-import { SellersTable } from '@/components/dashboard/seller/sellertable';
+import { SellersFilters } from '@/components/dashboard/seller/seller-filter';
+import type { Seller } from '@/components/dashboard/seller/seller-table';
+import { SellersTable } from '@/components/dashboard/seller/seller-table';
 import { approveSeller, fetchSellers, } from '@/lib/admin/api-calls';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -26,7 +26,7 @@ export default function Page(): React.JSX.Element {
       loadSellers();
   }, []);
 
-  const handleApprove = async (sellerId: ObjectId, currentStatus: boolean) => {
+  const handleApprove = async (sellerId: Object, currentStatus: boolean) => {
     // Call the API to toggle the approval status
     const response = await approveSeller(sellerId, currentStatus);
 
@@ -56,7 +56,6 @@ export default function Page(): React.JSX.Element {
               page={page}
               rows={paginatedCustomers}
               rowsPerPage={rowsPerPage}
-              onApprove={handleApprove} // Pass the handleApprove function as a prop
           />
       </Stack>
   );

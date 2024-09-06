@@ -15,6 +15,7 @@ import dayjs from 'dayjs';
 import * as React from 'react';
 
 import { useSelection } from '@/hooks/use-selection';
+import { MdDelete } from 'react-icons/md';
 
 function noop(): void {
   // do nothing
@@ -88,7 +89,7 @@ export function CustomersTable({
                     {row.address.city}, {row.address.state}, {row.address.country}
                   </TableCell> */}
                   <TableCell>{dayjs(row.createdAt).format('MMM D, YYYY')}</TableCell>
-                  <TableCell></TableCell>
+                  <TableCell sx={{ fontSize: '30px', cursor: "pointer" }}><MdDelete /></TableCell>
                 </TableRow>
               );
             })}
