@@ -11,10 +11,10 @@ function generateToken(): string {
 }
 
 export interface SignUpParams {
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
   password: string;
+  terms: boolean;
 }
 
 export interface SignInWithOAuthParams {
@@ -31,13 +31,31 @@ export interface ResetPasswordParams {
 }
 
 class AuthClient {
-  async signUp(_: SignUpParams): Promise<{ error?: string }> {
-    // Make API request
+  async signUp(params: SignUpParams): Promise<{ error?: string }> {
+    // Create requestData without terms and add the role property
+    const { terms, ...filteredParams } = params;
+    const requestData = {
+      ...filteredParams,
+      role: "seller", // Add the role property
+    };
+    try {
+      const response = await fetch(`${BACKEND_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
 
-    // We do not handle the API, so we'll just generate a token and store it in localStorage.
-    const token = generateToken();
-    localStorage.setItem('auth-access-token', token);
-
+      const data = await response.json();
+      if (!response.ok) {
+        return { error: 'Invalid credentials' };
+      }
+      const token = data.tokens.access.token;
+      localStorage.setItem('auth-access-token', token);
+    } catch (error) {
+      return { error: "Something went wrong!!" };
+    }
     return {};
   }
 
@@ -46,9 +64,6 @@ class AuthClient {
   }
 
   async signInWithPassword(params: SignInWithPasswordParams): Promise<{ error?: string }> {
-    const { email, password } = params;
-
-    // Make API request
     try {
       const response = await fetch(`${BACKEND_URL}/auth/login`, {
         method: 'POST',
@@ -65,9 +80,8 @@ class AuthClient {
       const token = data.tokens.access.token;
       localStorage.setItem('auth-access-token', token);
     } catch (error) {
-      return { error: "error" };
+      return { error: "Something went wrong!!" };
     }
-
     return {};
   }
 
@@ -95,7 +109,7 @@ class AuthClient {
       const data = await response.json();
       if (!response.ok) {
         localStorage.removeItem('auth-access-token');
-        const errorMessage = response.status === 401 ? "Token is invalid or expired." : data.message || "Something went wrong!";
+        const errorMessage = response.status === 401 ? "Token is invalid or expired." : data.message || "Something went wrong!!";
         return { data: null, error: errorMessage };
       }
       return { data: data };

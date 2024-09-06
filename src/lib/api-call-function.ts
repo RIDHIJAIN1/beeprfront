@@ -4,8 +4,8 @@ export async function authenticatedApiCall(
     route: string, 
     method: string, 
     contentType: string = "application/json", 
-    queryParams: Record<string, any> = null, 
-    bodyParams: Record<string, any> = null): Promise<{ data: any; error?: string }> {
+    bodyParams: Record<string, any> = null, 
+    queryParams: Record<string, any> = null): Promise<{ data: any; error?: string }> {
     const token = localStorage.getItem('auth-access-token');
     if (!token) return { data: null, error: "Auth token unavailable" };
 

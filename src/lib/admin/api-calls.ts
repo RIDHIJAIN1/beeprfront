@@ -20,32 +20,22 @@ export async function fetchSellers() {
     return sellerResponse.data;
 }
 
-
-
-export async function approveSeller(sellerId: ObjectId, isApproved: boolean) {
-    const url = `/seller/${sellerId}/approve`;
-
-    const response = await authenticatedApiCall(url, "PATCH", {
-        isApproved: !isApproved, // Toggle the approval status
-    });
-
-    if (response.error) {
-        console.error(response.error);
-        return null; // Handle error as needed
+export async function approveSellers(sellerId: String) {
+    const sellerResponse = await authenticatedApiCall(`/seller/${sellerId}/approve`, "PATCH");
+    if (sellerResponse.error && !(sellerResponse.data) && !(sellerResponse.data.results)) {
+        console.error(sellerResponse.error);
+        return []; // or handle the error as needed
     }
+    return sellerResponse.data;
+}
 
-    return response.data;
+export async function disapproveSellers(selectedSeller: string, message: string) {
+    const sellerResponse = await authenticatedApiCall(`/seller/${selectedSeller}/disapprove`, "PATCH", "application/json", {message});
+    if (sellerResponse.error && !(sellerResponse.data) && !(sellerResponse.data.results)) {
+        console.error(sellerResponse.error);
+        return []; // or handle the error as needed
+    }
+    return sellerResponse.data;
 }
 
 
-
-
-// export async function delteSellers(querry) {
-//     const sellerResponse = await authenticatedApiCall("/seller", "DELTE", "application/json", querry);
-
-//     if (sellerResponse.error && !(sellerResponse.data) && !(sellerResponse.data.results)) {
-//         console.error(sellerResponse.error);
-//         return []; // or handle the error as needed
-//     }
-//     return sellerResponse.data;
-// }
