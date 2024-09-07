@@ -41,7 +41,7 @@ export interface Seller {
     resellersPermit: string;
     cannabisLicense: string;
     paymentOption: string; // Include payment option
-    isApproved: boolean; // Include approval status
+    isApproved: string; // Include approval status
 }
 
 interface SellersTableProps {
@@ -147,16 +147,16 @@ export function SellersTable({
                                         <TableCell>{row.paymentOption}</TableCell> {/* Display payment option */}
                                         <TableCell>{dayjs(row.createdAt).format('MMM D, YYYY')}</TableCell>
                                         <TableCell>
-                                            <a className='text-sky-600' href={`${BACKEND_URL}/${row.photoId}`}>Link</a>
+                                            <a className='text-sky-600' target="_blank" href={`${BACKEND_URL}/${row.photoId}`}>Link</a>
                                         </TableCell>
                                         <TableCell>
-                                            <a className='text-sky-600' href={`${BACKEND_URL}/${row.cannabisLicense}`}>Link</a>
+                                            <a className='text-sky-600' target="_blank" href={`${BACKEND_URL}/${row.cannabisLicense}`}>Link</a>
                                         </TableCell>
                                         <TableCell>
-                                            <a className='text-sky-600' href={`${BACKEND_URL}/${row.resellersPermit}`}>Link</a>
+                                            <a className='text-sky-600' target="_blank" href={`${BACKEND_URL}/${row.resellersPermit}`}>Link</a>
                                         </TableCell>
                                         <TableCell>
-                                            {row.isApproved ? (<span className='text-green-400'>Yes</span>) : (<span className='text-red-500'>No</span>)}
+                                            {row.isApproved == "approved" ? (<span className='text-green-400'>Yes</span>) : (row.isApproved == "rejected" ? (<span className='text-green-400'>Rejected</span>) : (<span className='text-yellow-500'>Pending</span>))}
                                         </TableCell>
                                         <TableCell sx={{ fontSize: '30px' }}>
                                             <div className='flex gap-3'>

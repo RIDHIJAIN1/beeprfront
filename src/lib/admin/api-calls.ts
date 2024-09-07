@@ -63,8 +63,9 @@ export async function updateCategory(categoryId: string, name: string) {
     }
     return response.data;
 }
-export async function deleteCategory(categoryId: string) {
-    const response = await authenticatedApiCall(`/category/${categoryId}`, "DELETE", "application/json");
+export async function changeStatusCategory(categoryId: string) {
+    const response = await authenticatedApiCall(`/category/${categoryId}/status`, "PATCH", "application/json");
+    console.log(response);
     if (response.error || !(response.data) || !(response.data.results)) {
         console.error(response.error);
         return []; // or handle the error as needed

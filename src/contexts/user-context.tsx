@@ -29,7 +29,7 @@ export function UserProvider({ children }: UserProviderProps): React.JSX.Element
   const checkSession = React.useCallback(async (): Promise<void> => {
     try {
       const { data, error } = await authClient.getUser();
-      console.log(data, error );
+      // console.log(data, error );
 
       if (!data) {
         if (error && error !== "TokenExpired") {

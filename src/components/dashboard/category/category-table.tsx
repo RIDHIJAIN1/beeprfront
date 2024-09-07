@@ -1,6 +1,6 @@
 'use client';
 
-import { deleteCategory, fetchCategories, updateCategory } from '@/lib/admin/api-calls';
+import { changeStatusCategory, updateCategory } from '@/lib/admin/api-calls';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -15,8 +15,7 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import dayjs from 'dayjs';
 import * as React from 'react';
-import { FaPencilAlt } from "react-icons/fa";
-import { MdDelete } from 'react-icons/md';
+import { FaExchangeAlt, FaPencilAlt } from "react-icons/fa";
 
 function noop(): void {
   // do nothing
@@ -25,6 +24,7 @@ function noop(): void {
 export interface Category {
   id: string;
   avatar: string;
+  status: boolean;
   name: string;
   createdAt: Date;
 }
@@ -46,7 +46,7 @@ export function CategoriesTable({
 }: CategoriesTableProps): React.JSX.Element {
 
   const [openEditModal, setOpenEditModal] = React.useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
+  const [openChangeStatusDialog, setOpenChangeStatusDialog] = React.useState(false);
   const [selectedCategory, setSelectedCategory] = React.useState<Category | null>(null);
   const [newCategoryName, setNewCategoryName] = React.useState('');
 
@@ -56,9 +56,9 @@ export function CategoriesTable({
     setOpenEditModal(true);
   };
 
-  const handleDeleteClick = (category: Category) => {
+  const handleChangeStatusClick = (category: Category) => {
     setSelectedCategory(category);
-    setOpenDeleteDialog(true);
+    setOpenChangeStatusDialog(true);
   };
 
   const handleEditSubmit = async () => {
@@ -70,10 +70,10 @@ export function CategoriesTable({
     }
   };
 
-  const handleDeleteConfirm = async () => {
+  const handleChangeStatusConfirm = async () => {
     if (selectedCategory) {
-      await deleteCategory(selectedCategory.id);
-      setOpenDeleteDialog(false);
+      await changeStatusCategory(selectedCategory.id);
+      setOpenChangeStatusDialog(false);
       setSelectedCategory(null);
       await updateCategories();
     }
@@ -93,6 +93,7 @@ export function CategoriesTable({
               <TableRow>
                 <TableCell>Name</TableCell>
                 <TableCell>Created At</TableCell>
+                <TableCell>Status</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -107,6 +108,7 @@ export function CategoriesTable({
                       </Stack>
                     </TableCell>
                     <TableCell>{dayjs(row.createdAt).format('D MMM, YYYY')}</TableCell>
+                    <TableCell>{row.status ? (<span className='text-green-500'>Active</span>) : (<span className='text-red-500'>Inactive</span>)}</TableCell>
                     <TableCell sx={{ fontSize: '30px' }}>
                       <div className='flex gap-3'>
                         <FaPencilAlt
@@ -114,10 +116,10 @@ export function CategoriesTable({
                           className='p-2 shadow-md text-blue-500'
                           onClick={() => handleEditClick(row)}
                         />
-                        <MdDelete
-                          title='Delete Category'
+                        <FaExchangeAlt
+                          title='Change Category Status'
                           className='p-2 shadow-md text-red-500'
-                          onClick={() => handleDeleteClick(row)}
+                          onClick={() => handleChangeStatusClick(row)}
                         />
                       </div>
                     </TableCell>
@@ -160,15 +162,15 @@ export function CategoriesTable({
         </DialogActions>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
+      {/* ChangeStatus Confirmation Dialog */}
+      <Dialog open={openChangeStatusDialog} onClose={() => setOpenChangeStatusDialog(false)}>
+        <DialogTitle>Confirm Status Change</DialogTitle>
         <DialogContent>
-          <Typography>Are you sure you want to delete this category?</Typography>
+          <Typography>Are you sure you want to change status of this category?</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDeleteDialog(false)} color="primary">Cancel</Button>
-          <Button onClick={handleDeleteConfirm} color="primary">Delete</Button>
+          <Button onClick={() => setOpenChangeStatusDialog(false)} color="primary">Cancel</Button>
+          <Button onClick={handleChangeStatusConfirm} color="primary">Change</Button>
         </DialogActions>
       </Dialog>
 
