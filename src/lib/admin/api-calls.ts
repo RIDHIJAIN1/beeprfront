@@ -73,3 +73,15 @@ export async function changeStatusCategory(categoryId: string) {
     return response.data;
 }
 
+// #################################### Category APIs ####################################
+
+export async function fetchCount() {
+    const response = await authenticatedApiCall("/users/count", "GET");
+    console.log(response);
+    if (response.error || !(response.data)) {
+        console.error(response.error);
+        return []; // or handle the error as needed
+    }
+    return response.data;
+   
+}
