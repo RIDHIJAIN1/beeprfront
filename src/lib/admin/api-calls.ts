@@ -1,41 +1,74 @@
 import { authenticatedApiCall } from '@/lib/api-call-function';
 
+// #################################### Customers APIs ####################################
 export async function fetchCustomers() {
-    const customersResponse = await authenticatedApiCall("/users", "GET");
+    const response = await authenticatedApiCall("/users", "GET");
 
-    if (customersResponse.error && !(customersResponse.data) && !(customersResponse.data.results)) {
-        console.error(customersResponse.error);
+    if (response.error || !(response.data) || !(response.data.results)) {
+        console.error(response.error);
         return []; // or handle the error as needed
     }
 
-    return customersResponse.data.results;
+    return response.data.results;
 }
+
+// #################################### Sellers APIs ####################################
 export async function fetchSellers() {
-    const sellerResponse = await authenticatedApiCall("/seller", "GET");
-
-    if (sellerResponse.error && !(sellerResponse.data) && !(sellerResponse.data.results)) {
-        console.error(sellerResponse.error);
+    const response = await authenticatedApiCall("/seller", "GET");
+    if (response.error || !(response.data)) {
+        console.error(response.error);
         return []; // or handle the error as needed
     }
-    return sellerResponse.data;
+    return response.data;
 }
-
-export async function approveSellers(sellerId: String) {
-    const sellerResponse = await authenticatedApiCall(`/seller/${sellerId}/approve`, "PATCH");
-    if (sellerResponse.error && !(sellerResponse.data) && !(sellerResponse.data.results)) {
-        console.error(sellerResponse.error);
+export async function approveSeller(sellerId: String) {
+    const response = await authenticatedApiCall(`/seller/${sellerId}/approve`, "PATCH");
+    if (response.error || !(response.data) || !(response.data.results)) {
+        console.error(response.error);
         return []; // or handle the error as needed
     }
-    return sellerResponse.data;
+    return response.data;
 }
-
-export async function disapproveSellers(selectedSeller: string, message: string) {
-    const sellerResponse = await authenticatedApiCall(`/seller/${selectedSeller}/disapprove`, "PATCH", "application/json", {message});
-    if (sellerResponse.error && !(sellerResponse.data) && !(sellerResponse.data.results)) {
-        console.error(sellerResponse.error);
+export async function disapproveSeller(selectedSeller: string, message: string) {
+    const response = await authenticatedApiCall(`/seller/${selectedSeller}/disapprove`, "PATCH", "application/json", {message});
+    if (response.error || !(response.data) || !(response.data.results)) {
+        console.error(response.error);
         return []; // or handle the error as needed
     }
-    return sellerResponse.data;
+    return response.data;
 }
 
+// #################################### Category APIs ####################################
+export async function fetchCategories() {
+    const response = await authenticatedApiCall("/category", "GET");
+    if (response.error || !(response.data)) {
+        console.error(response.error);
+        return []; // or handle the error as needed
+    }
+    return response.data;
+}
+export async function addCategory(name: string) {
+    const response = await authenticatedApiCall(`/category`, "POST", "application/json", {name});
+    if (response.error || !(response.data) || !(response.data.results)) {
+        console.error(response.error);
+        return []; // or handle the error as needed
+    }
+    return response.data;
+}
+export async function updateCategory(categoryId: string, name: string) {
+    const response = await authenticatedApiCall(`/category/${categoryId}`, "PATCH", "application/json", {name});
+    if (response.error || !(response.data) || !(response.data.results)) {
+        console.error(response.error);
+        return []; // or handle the error as needed
+    }
+    return response.data;
+}
+export async function deleteCategory(categoryId: string) {
+    const response = await authenticatedApiCall(`/category/${categoryId}`, "DELETE", "application/json");
+    if (response.error || !(response.data) || !(response.data.results)) {
+        console.error(response.error);
+        return []; // or handle the error as needed
+    }
+    return response.data;
+}
 

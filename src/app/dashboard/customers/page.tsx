@@ -16,10 +16,6 @@ const customers = fetchCustomers();
 
 export default function Page(): React.JSX.Element {
   const [customers, setCustomers] = React.useState<Customer[]>([]);
-
-  const page = 0;
-  const rowsPerPage = 5;
-
   React.useEffect(() => {
     const loadCustomers = async () => {
       const fetchedCustomers = await fetchCustomers();
@@ -28,6 +24,8 @@ export default function Page(): React.JSX.Element {
     loadCustomers();
   }, []);
 
+  const page = 0;
+  const rowsPerPage = 10;
   const paginatedCustomers = applyPagination(customers, page, rowsPerPage);
 
   return (

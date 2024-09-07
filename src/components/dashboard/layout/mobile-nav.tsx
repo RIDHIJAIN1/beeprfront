@@ -16,6 +16,7 @@ import type { NavItemConfig } from '@/types/nav';
 
 import { navItems } from './config';
 import { navIcons } from './nav-icons';
+import { UserContext } from '@/contexts/user-context';
 
 export interface MobileNavProps {
   onClose?: () => void;
@@ -68,13 +69,17 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
 }
 
 function renderNavItems({ items = [], pathname }: { items?: NavItemConfig[]; pathname: string }): React.JSX.Element {
-  const children = items.reduce((acc: React.ReactNode[], curr: NavItemConfig): React.ReactNode[] => {
-    const { key, ...item } = curr;
-
-    acc.push(<NavItem key={key} pathname={pathname} {...item} />);
-
-    return acc;
-  }, []);
+  const userContext = React.useContext(UserContext); // Access user from context
+  if (!userContext) return (<div>Error: User context is not available</div>);
+  const { user } = userContext;
+  const userRole = user?.role || "";
+  const children = items
+    .filter((item) => item.role == userRole || item.role == "common")
+    .reduce((acc: React.ReactNode[], curr: NavItemConfig): React.ReactNode[] => {
+      const { key, ...item } = curr;
+      acc.push(<NavItem key={key} pathname={pathname} {...item} />);
+      return acc;
+    }, []);
 
   return (
     <Stack component="ul" spacing={1} sx={{ listStyle: 'none', m: 0, p: 0 }}>
@@ -96,11 +101,11 @@ function NavItem({ disabled, external, href, icon, matcher, pathname, title }: N
       <Box
         {...(href
           ? {
-              component: external ? 'a' : RouterLink,
-              href,
-              target: external ? '_blank' : undefined,
-              rel: external ? 'noreferrer' : undefined,
-            }
+            component: external ? 'a' : RouterLink,
+            href,
+            target: external ? '_blank' : undefined,
+            rel: external ? 'noreferrer' : undefined,
+          }
           : { role: 'button' })}
         sx={{
           alignItems: 'center',

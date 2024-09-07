@@ -27,7 +27,9 @@ export interface UserPopoverProps {
 
 export function UserPopover({ anchorEl, onClose, open }: UserPopoverProps): React.JSX.Element {
   const { checkSession } = useUser();
-  const { user } = React.useContext(UserContext); // Access user from context
+  const userContext = React.useContext(UserContext); // Access user from context
+  if (!userContext) return (<div>Error: User context is not available</div>);
+  const { user } = userContext;
   const router = useRouter();
 
   const handleSignOut = React.useCallback(async (): Promise<void> => {
@@ -59,25 +61,31 @@ export function UserPopover({ anchorEl, onClose, open }: UserPopoverProps): Reac
       slotProps={{ paper: { sx: { width: '240px' } } }}
     >
       <Box sx={{ p: '16px 20px ' }}>
-        <Typography variant="subtitle1" className='uppercase'><span className="uppercase">{user.name}</span></Typography>
+        <Typography variant="subtitle1" className='uppercase'><span className="uppercase">{user?.name || 'Guest'}</span></Typography>
         <Typography color="text.secondary" variant="body2">
-          {user.email}
+          {user ? user.email : 'No email available'}
         </Typography>
       </Box>
       <Divider />
       <MenuList disablePadding sx={{ p: '8px', '& .MuiMenuItem-root': { borderRadius: 1 } }}>
-        <MenuItem component={RouterLink} href={paths.dashboard.settings} onClick={onClose}>
-          <ListItemIcon>
-            <GearSixIcon fontSize="var(--icon-fontSize-md)" />
-          </ListItemIcon>
-          Settings
-        </MenuItem>
-        <MenuItem component={RouterLink} href={paths.dashboard.account} onClick={onClose}>
-          <ListItemIcon>
-            <UserIcon fontSize="var(--icon-fontSize-md)" />
-          </ListItemIcon>
-          Profile
-        </MenuItem>
+
+        {user?.role == "seller" ? (
+          <MenuItem component={RouterLink} href={paths.dashboard.account} onClick={onClose}>
+            <ListItemIcon>
+              <UserIcon fontSize="var(--icon-fontSize-md)" />
+            </ListItemIcon>
+            Profile
+          </MenuItem>
+        ) : ""}
+        {user?.role == "admin" ? (
+          <MenuItem component={RouterLink} href={paths.dashboard.settings} onClick={onClose}>
+            <ListItemIcon>
+              <GearSixIcon fontSize="var(--icon-fontSize-md)" />
+            </ListItemIcon>
+            Settings
+          </MenuItem>
+        ) : ""}
+
         <MenuItem onClick={handleSignOut}>
           <ListItemIcon>
             <SignOutIcon fontSize="var(--icon-fontSize-md)" />

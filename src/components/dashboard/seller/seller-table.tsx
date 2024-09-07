@@ -1,5 +1,5 @@
 "use client";
-import { approveSellers, disapproveSellers } from '@/lib/admin/api-calls';
+import { approveSeller, disapproveSeller } from '@/lib/admin/api-calls';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -49,6 +49,7 @@ interface SellersTableProps {
     page?: number;
     rows?: Seller[];
     rowsPerPage?: number;
+    updateSellers: () => Promise<void>;
 }
 
 export function SellersTable({
@@ -56,12 +57,15 @@ export function SellersTable({
     rows = [],
     page = 0,
     rowsPerPage = 0,
+    updateSellers,
 }: SellersTableProps): React.JSX.Element {
+
     const rowIds = React.useMemo(() => {
         return rows.map((seller) => seller._id);
     }, [rows]);
 
     const [openModal, setOpenModal] = React.useState(false);
+    const [openApproveModal, setOpenApproveModal] = React.useState(false); // State for approval confirmation modal
     const [selectedSeller, setSelectedSeller] = React.useState<string | null>(null);
     const [message, setMessage] = React.useState('');
 
@@ -76,20 +80,35 @@ export function SellersTable({
         setOpenModal(false);
     };
 
-    const handleApprove = async (sellerId: String) => {
-        let response = await approveSellers(sellerId);
+    const handleOpenApproveModal = (sellerId: string) => {
+        setSelectedSeller(sellerId);
+        setOpenApproveModal(true); // Open the approval confirmation modal
+    };
+
+    const handleCloseApproveModal = () => {
+        setSelectedSeller(null);
+        setOpenApproveModal(false); // Close the approval confirmation modal
+    };
+
+    const handleApprove = async () => {
+        if (!selectedSeller) return;
+        let response = await approveSeller(selectedSeller);
         console.log(response);
-        if(response && response.status=="success")
+        if (response && response.status === "success") {
             console.log('Seller approved successfully!');
-        else
+        } else {
             console.log(response);
+        }
+        handleCloseApproveModal(); // Close modal after successful approval
+        await updateSellers();
     };
 
     const handleDisApprove = async () => {
         if (!selectedSeller) return;
-        let response = await disapproveSellers(selectedSeller, message);
+        let response = await disapproveSeller(selectedSeller, message);
         console.log(response);
         handleCloseModal(); // Close modal after successful disapproval
+        await updateSellers();
     };
 
     return (
@@ -118,7 +137,7 @@ export function SellersTable({
                                         <TableCell>
                                             <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
                                                 {/* <Avatar src={row.avatar} /> */}
-                                                <Typography variant="subtitle2"><span className='capitalize'>{row._id + " " + row.user.name}</span></Typography>
+                                                <Typography variant="subtitle2"><span className='capitalize'>{row.user.name}</span></Typography>
                                             </Stack>
                                         </TableCell>
                                         <TableCell>{row.user.email}</TableCell>
@@ -141,7 +160,7 @@ export function SellersTable({
                                         </TableCell>
                                         <TableCell sx={{ fontSize: '30px' }}>
                                             <div className='flex gap-3'>
-                                                <TiTick onClick={() => handleApprove(row._id)} className='shadow-md text-green-500' />
+                                                <TiTick onClick={() => handleOpenApproveModal(row._id)} className='shadow-md text-green-500' />
                                                 <RxCross2 onClick={() => handleOpenModal(row._id)} className='shadow-md text-red-500' />
                                             </div>
                                         </TableCell>
@@ -185,6 +204,21 @@ export function SellersTable({
                     </Button>
                     <Button onClick={handleDisApprove} color="primary">
                         Send
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            {/* Modal for Approval Confirmation */}
+            <Dialog open={openApproveModal} onClose={handleCloseApproveModal}>
+                <DialogTitle>Approve Seller</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>Are you sure you want to approve this seller?</DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseApproveModal} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleApprove} color="primary">
+                        Confirm
                     </Button>
                 </DialogActions>
             </Dialog>

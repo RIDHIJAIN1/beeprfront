@@ -1,7 +1,7 @@
 'use client';
 
-import * as React from 'react';
 import { useRouter } from 'next/navigation';
+import * as React from 'react';
 // import Alert from '@mui/material/Alert';
 
 import { paths } from '@/paths';
@@ -23,17 +23,13 @@ export function AuthGuard({ children }: AuthGuardProps): React.JSX.Element | nul
       return;
     }
 
-    if (error) {
-      console.error('AuthGuard: Error occurred', error);
-      return;
-    }
-
-    if (!user) {
+    if (!user || error) {
       console.debug('AuthGuard: User is not logged in, redirecting...');
+      // console.error('AuthGuard: Error occurred', error);
       router.replace(paths.auth.signIn);
       return;
     }
-    
+
     console.debug('AuthGuard: User is logged in, allowing access');
   }, [user, error, isLoading, router]);
 

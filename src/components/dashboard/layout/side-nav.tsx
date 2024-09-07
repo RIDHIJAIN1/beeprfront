@@ -8,16 +8,19 @@ import RouterLink from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
 
-import { Logo } from '@/components/core/logo';
 import { isNavItemActive } from '@/lib/is-nav-item-active';
 import { paths } from '@/paths';
 import type { NavItemConfig } from '@/types/nav';
 
+import { UserContext } from '@/contexts/user-context';
 import { navItems } from './config';
 import { navIcons } from './nav-icons';
 
 export function SideNav(): React.JSX.Element {
   const pathname = usePathname();
+  const userContext = React.useContext(UserContext); // Access user from context
+  if (!userContext) return (<div>Error: User context is not available</div>);
+  const { user } = userContext;
 
   return (
     <Box
@@ -48,8 +51,8 @@ export function SideNav(): React.JSX.Element {
       }}
     >
       <Stack spacing={2} sx={{ p: 3 }}>
-        <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-flex', textDecoration:'none', color:'#B3B9B6' }}>
-          <h2 >ADMIN PANEL</h2>
+        <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-flex', textDecoration: 'none', color: '#B3B9B6' }}>
+          <h2 >{user?.role == "admin" ? "ADMIN PANEL" : "SELLER PANEL"}</h2>
         </Box>
       </Stack>
       <Divider sx={{ borderColor: 'var(--mui-palette-neutral-700)' }} />
@@ -61,13 +64,17 @@ export function SideNav(): React.JSX.Element {
 }
 
 function renderNavItems({ items = [], pathname }: { items?: NavItemConfig[]; pathname: string }): React.JSX.Element {
-  const children = items.reduce((acc: React.ReactNode[], curr: NavItemConfig): React.ReactNode[] => {
-    const { key, ...item } = curr;
-
-    acc.push(<NavItem key={key} pathname={pathname} {...item} />);
-
-    return acc;
-  }, []);
+  const userContext = React.useContext(UserContext); // Access user from context
+  if (!userContext) return (<div>Error: User context is not available</div>);
+  const { user } = userContext;
+  const userRole = user?.role || "";
+  const children = items
+    .filter((item) => item.role == userRole || item.role == "common")
+    .reduce((acc: React.ReactNode[], curr: NavItemConfig): React.ReactNode[] => {
+      const { key, ...item } = curr;
+      acc.push(<NavItem key={key} pathname={pathname} {...item} />);
+      return acc;
+    }, []);
 
   return (
     <Stack component="ul" spacing={1} sx={{ listStyle: 'none', m: 0, p: 0 }}>
@@ -89,11 +96,11 @@ function NavItem({ disabled, external, href, icon, matcher, pathname, title }: N
       <Box
         {...(href
           ? {
-              component: external ? 'a' : RouterLink,
-              href,
-              target: external ? '_blank' : undefined,
-              rel: external ? 'noreferrer' : undefined,
-            }
+            component: external ? 'a' : RouterLink,
+            href,
+            target: external ? '_blank' : undefined,
+            rel: external ? 'noreferrer' : undefined,
+          }
           : { role: 'button' })}
         sx={{
           alignItems: 'center',

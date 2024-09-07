@@ -1,4 +1,5 @@
 export interface NavItemConfig {
+  role: string;
   key: string;
   title?: string;
   disabled?: boolean;

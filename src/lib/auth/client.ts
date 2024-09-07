@@ -109,7 +109,7 @@ class AuthClient {
       const data = await response.json();
       if (!response.ok) {
         localStorage.removeItem('auth-access-token');
-        const errorMessage = response.status === 401 ? "Token is invalid or expired." : data.message || "Something went wrong!!";
+        const errorMessage = response.status === 401 ? "TokenExpired" : data.message || "Something went wrong!!";
         return { data: null, error: errorMessage };
       }
       return { data: data };
