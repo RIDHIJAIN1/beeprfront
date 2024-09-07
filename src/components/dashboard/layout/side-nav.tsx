@@ -52,7 +52,7 @@ export function SideNav(): React.JSX.Element {
     >
       <Stack spacing={2} sx={{ p: 3 }}>
         <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-flex', textDecoration: 'none', color: '#B3B9B6' }}>
-          <h2 >{user?.role == "admin" ? "ADMIN PANEL" : "SELLER PANEL"}</h2>
+          <h2 >{user?.role === "admin" ? "ADMIN PANEL" : "SELLER PANEL"}</h2>
         </Box>
       </Stack>
       <Divider sx={{ borderColor: 'var(--mui-palette-neutral-700)' }} />
@@ -69,7 +69,7 @@ function renderNavItems({ items = [], pathname }: { items?: NavItemConfig[]; pat
   const { user } = userContext;
   const userRole = user?.role || "";
   const children = items
-    .filter((item) => item.role == userRole || item.role == "common")
+    .filter((item) => item.role === userRole || item.role === "common")
     .reduce((acc: React.ReactNode[], curr: NavItemConfig): React.ReactNode[] => {
       const { key, ...item } = curr;
       acc.push(<NavItem key={key} pathname={pathname} {...item} />);

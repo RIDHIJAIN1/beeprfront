@@ -14,9 +14,9 @@ import { isNavItemActive } from '@/lib/is-nav-item-active';
 import { paths } from '@/paths';
 import type { NavItemConfig } from '@/types/nav';
 
+import { UserContext } from '@/contexts/user-context';
 import { navItems } from './config';
 import { navIcons } from './nav-icons';
-import { UserContext } from '@/contexts/user-context';
 
 export interface MobileNavProps {
   onClose?: () => void;
@@ -74,7 +74,7 @@ function renderNavItems({ items = [], pathname }: { items?: NavItemConfig[]; pat
   const { user } = userContext;
   const userRole = user?.role || "";
   const children = items
-    .filter((item) => item.role == userRole || item.role == "common")
+    .filter((item) => item.role === userRole || item.role === "common")
     .reduce((acc: React.ReactNode[], curr: NavItemConfig): React.ReactNode[] => {
       const { key, ...item } = curr;
       acc.push(<NavItem key={key} pathname={pathname} {...item} />);

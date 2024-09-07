@@ -69,7 +69,7 @@ export function UserPopover({ anchorEl, onClose, open }: UserPopoverProps): Reac
       <Divider />
       <MenuList disablePadding sx={{ p: '8px', '& .MuiMenuItem-root': { borderRadius: 1 } }}>
 
-        {user?.role == "seller" ? (
+        {user?.role === "seller" ? (
           <MenuItem component={RouterLink} href={paths.dashboard.account} onClick={onClose}>
             <ListItemIcon>
               <UserIcon fontSize="var(--icon-fontSize-md)" />
@@ -77,7 +77,7 @@ export function UserPopover({ anchorEl, onClose, open }: UserPopoverProps): Reac
             Profile
           </MenuItem>
         ) : ""}
-        {user?.role == "admin" ? (
+        {user?.role === "admin" ? (
           <MenuItem component={RouterLink} href={paths.dashboard.settings} onClick={onClose}>
             <ListItemIcon>
               <GearSixIcon fontSize="var(--icon-fontSize-md)" />
