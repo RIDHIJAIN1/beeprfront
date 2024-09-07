@@ -18,17 +18,20 @@ import dayjs from 'dayjs';
 
 import { useSelection } from '@/hooks/use-selection';
 
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 function noop(): void {
   // do nothing
 }
 
 export interface Product {
-  id: string;
-  avatar: string;
+  id:string;
+  title: string;
+  image: string;
   name: string;
-  email: string;
-  address: { city: string; state: string; country: string; street: string };
-  phone: string;
+  weight: string;
+  description: string;
   createdAt: Date;
 }
 
@@ -60,24 +63,12 @@ export function ProductsTable({
         <Table sx={{ minWidth: '800px' }}>
           <TableHead>
             <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  checked={selectedAll}
-                  indeterminate={selectedSome}
-                  onChange={(event) => {
-                    if (event.target.checked) {
-                      selectAll();
-                    } else {
-                      deselectAll();
-                    }
-                  }}
-                />
-              </TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Location</TableCell>
-              <TableCell>Phone</TableCell>
-              <TableCell>Signed Up</TableCell>
+               <TableCell>S No.</TableCell>
+              <TableCell>Title</TableCell>
+              <TableCell>Image</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell>Weight</TableCell>
+              <TableCell>Created At</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -86,29 +77,15 @@ export function ProductsTable({
 
               return (
                 <TableRow hover key={row.id} selected={isSelected}>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={isSelected}
-                      onChange={(event) => {
-                        if (event.target.checked) {
-                          selectOne(row.id);
-                        } else {
-                          deselectOne(row.id);
-                        }
-                      }}
-                    />
-                  </TableCell>
+                  
+                  
+                  <TableCell>{count}</TableCell>
+                  <TableCell>{row.title}</TableCell>
                   <TableCell>
-                    <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
-                      <Avatar src={row.avatar} />
-                      <Typography variant="subtitle2">{row.name}</Typography>
-                    </Stack>
+                  <a className='text-sky-600' target="_blank" href={`${BACKEND_URL}/${row.image}`}>Link</a>
                   </TableCell>
-                  <TableCell>{row.email}</TableCell>
-                  <TableCell>
-                    {row.address.city}, {row.address.state}, {row.address.country}
-                  </TableCell>
-                  <TableCell>{row.phone}</TableCell>
+                  <TableCell>{row.description}</TableCell>
+                  <TableCell> {row.weight} kg</TableCell>
                   <TableCell>{dayjs(row.createdAt).format('MMM D, YYYY')}</TableCell>
                 </TableRow>
               );
