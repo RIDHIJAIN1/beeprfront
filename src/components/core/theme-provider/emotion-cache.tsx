@@ -1,10 +1,10 @@
 'use client';
 
-import * as React from 'react';
-import { useServerInsertedHTML } from 'next/navigation';
-import createCache from '@emotion/cache';
 import type { EmotionCache, Options as OptionsOfCreateCache } from '@emotion/cache';
+import createCache from '@emotion/cache';
 import { CacheProvider as DefaultCacheProvider } from '@emotion/react';
+import { useServerInsertedHTML } from 'next/navigation';
+import * as React from 'react';
 
 interface Registry {
   cache: EmotionCache;
@@ -58,12 +58,14 @@ export default function NextAppDirEmotionCacheProvider(props: NextAppDirEmotionC
 
     inserted.forEach(({ name, isGlobal }) => {
       const style = registry.cache.inserted[name];
-
       if (typeof style !== 'boolean') {
         if (isGlobal) {
-          globals.push({ name, style });
+          // Ensure style is defined before pushing to globals
+          if (style !== undefined) {
+            globals.push({ name, style });
+          }
         } else {
-          styles += style;
+          styles += style; // TypeScript will infer that style is a string here
           dataEmotionAttribute += ` ${name}`;
         }
       }

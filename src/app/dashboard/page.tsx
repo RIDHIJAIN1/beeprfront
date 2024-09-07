@@ -1,16 +1,15 @@
 "use client";
 
 import Grid from '@mui/material/Unstable_Grid2';
-import type { Metadata } from 'next';
+// import type { Metadata } from 'next';
 import * as React from 'react';
 
 import { CountCard } from '@/components/dashboard/overview/count-card';
-import { config } from '@/config';
+import { fetchCount } from '@/lib/admin/api-calls';
 import { CurrencyDollar as CurrencyDollarIcon } from '@phosphor-icons/react/dist/ssr/CurrencyDollar';
 import { ListBullets as ListBulletsIcon } from '@phosphor-icons/react/dist/ssr/ListBullets';
 import { Receipt as ReceiptIcon } from '@phosphor-icons/react/dist/ssr/Receipt';
 import { Users as UsersIcon } from '@phosphor-icons/react/dist/ssr/Users';
-import { fetchCount } from '@/lib/admin/api-calls';
 // import { UserContext } from '@/contexts/user-context';
 // export const metadata = { title: `Dashboard | ${config.site.name}` } satisfies Metadata;
 

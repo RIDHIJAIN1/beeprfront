@@ -4,12 +4,6 @@ import type { User } from '@/types/user';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-function generateToken(): string {
-  const arr = new Uint8Array(12);
-  window.crypto.getRandomValues(arr);
-  return Array.from(arr, (v) => v.toString(16).padStart(2, '0')).join('');
-}
-
 export interface SignUpParams {
   name: string;
   email: string;
@@ -36,7 +30,7 @@ class AuthClient {
     const { terms, ...filteredParams } = params;
     const requestData = {
       ...filteredParams,
-      role: "seller", // Add the role property
+      role: "seller",
     };
     try {
       const response = await fetch(`${BACKEND_URL}/auth/register`, {
