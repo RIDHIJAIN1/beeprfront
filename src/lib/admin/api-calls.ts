@@ -36,7 +36,13 @@ export async function disapproveSeller(selectedSeller: string, message: string) 
         return []; // or handle the error as needed
     }
     return response.data;
+
 }
+
+
+// #################################### Category APIs ####################################
+
+
 
 // #################################### Category APIs ####################################
 export async function fetchCategories() {
@@ -73,7 +79,8 @@ export async function changeStatusCategory(categoryId: string) {
     return response.data;
 }
 
-// #################################### Category APIs ####################################
+
+// #################################### Count APIs ####################################
 
 export async function fetchCount() {
     const response = await authenticatedApiCall("/users/count", "GET");
@@ -84,4 +91,17 @@ export async function fetchCount() {
     }
     return response.data;
    
+}
+
+// #################################### Product APIs ####################################
+
+export async function fetchProducts() {
+    const response = await authenticatedApiCall("/product", "GET");
+
+    if (response.error || !(response.data) || !(response.data.results)) {
+        console.error(response.error);
+        return []; // or handle the error as needed
+    }
+
+    return response.data.results;
 }
