@@ -8,20 +8,17 @@ import RouterLink from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
 
+import { useUser } from '@/hooks/use-user';
 import { isNavItemActive } from '@/lib/is-nav-item-active';
 import { paths } from '@/paths';
 import type { NavItemConfig } from '@/types/nav';
-
-import { UserContext } from '@/contexts/user-context';
 import { navItems } from './config';
 import { navIcons } from './nav-icons';
 
 export function SideNav(): React.JSX.Element {
   const pathname = usePathname();
-  const userContext = React.useContext(UserContext); // Access user from context
-  if (!userContext) return (<div>Error: User context is not available</div>);
-  const { user } = userContext;
-
+  const { user } = useUser();
+  if (!user) return <div>You must be logged in to view this content.</div>;
   return (
     <Box
       sx={{
@@ -64,12 +61,19 @@ export function SideNav(): React.JSX.Element {
 }
 
 function renderNavItems({ items = [], pathname }: { items?: NavItemConfig[]; pathname: string }): React.JSX.Element {
-  const userContext = React.useContext(UserContext); // Access user from context
-  if (!userContext) return (<div>Error: User context is not available</div>);
-  const { user } = userContext;
+  const { user } = useUser();
+  if (!user) return <div>You must be logged in to view this content.</div>;
   const userRole = user?.role || "";
+  let approvalRequired;
+  if (userRole == "admin")
+    approvalRequired = true;
+  else{
+    let sellerIsApproved = 'isApproved' in user ? user.isApproved : "pending";
+    approvalRequired = sellerIsApproved == "approved";
+  }
+  
   const children = items
-    .filter((item) => item.role === userRole || item.role === "common")
+    .filter((item) => (item.role === userRole || item.role === "common") && (item.approvalRequired ? (approvalRequired) : true))
     .reduce((acc: React.ReactNode[], curr: NavItemConfig): React.ReactNode[] => {
       const { key, ...item } = curr;
       acc.push(<NavItem key={key} pathname={pathname} {...item} />);

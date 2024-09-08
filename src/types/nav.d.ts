@@ -1,4 +1,5 @@
 export interface NavItemConfig {
+  approvalRequired: boolean;
   role: string;
   key: string;
   title?: string;
