@@ -93,7 +93,6 @@ export function SellersTable({
     const handleApprove = async () => {
         if (!selectedSeller) return;
         let response = await approveSeller(selectedSeller);
-        console.log(response);
         if (response && response.status === "success") {
             console.log('Seller approved successfully!');
         } else {
@@ -147,16 +146,16 @@ export function SellersTable({
                                         <TableCell>{row.paymentOption}</TableCell> {/* Display payment option */}
                                         <TableCell>{dayjs(row.createdAt).format('MMM D, YYYY')}</TableCell>
                                         <TableCell>
-                                            <a className='text-sky-600' target="_blank" href={`${BACKEND_URL}/${row.photoId}`}>Link</a>
+                                            <a className='text-pink-700' target="_blank" href={`${BACKEND_URL}/${row.photoId}`}>Link</a>
                                         </TableCell>
                                         <TableCell>
-                                            <a className='text-sky-600' target="_blank" href={`${BACKEND_URL}/${row.cannabisLicense}`}>Link</a>
+                                            <a className='text-pink-700' target="_blank" href={`${BACKEND_URL}/${row.cannabisLicense}`}>Link</a>
                                         </TableCell>
                                         <TableCell>
-                                            <a className='text-sky-600' target="_blank" href={`${BACKEND_URL}/${row.resellersPermit}`}>Link</a>
+                                            <a className='text-pink-700' target="_blank" href={`${BACKEND_URL}/${row.resellersPermit}`}>Link</a>
                                         </TableCell>
                                         <TableCell>
-                                            {row.isApproved == "approved" ? (<span className='text-green-400'>Yes</span>) : (row.isApproved == "rejected" ? (<span className='text-green-400'>Rejected</span>) : (<span className='text-yellow-500'>Pending</span>))}
+                                            {row.isApproved == "approved" ? (<span className='text-green-400'>Approved</span>) : (row.isApproved == "rejected" ? (<span className='text-red-400'>Rejected</span>) : (<span className='text-yellow-500'>Pending</span>))}
                                         </TableCell>
                                         <TableCell sx={{ fontSize: '30px' }}>
                                             <div className='flex gap-3'>

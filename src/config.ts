@@ -7,6 +7,6 @@ export interface Config {
 }
 
 export const config: Config = {
-  site: { name: 'Beepr', description: '', themeColor: '#090a0b', url: getSiteURL() },
+  site: { name: 'Beepr', description: '', themeColor: '#830D45', url: getSiteURL() },
   logLevel: (process.env.NEXT_PUBLIC_LOG_LEVEL as keyof typeof LogLevel) ?? LogLevel.ALL,
 };

@@ -1,22 +1,17 @@
 'use client';
 
-import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Checkbox from '@mui/material/Checkbox';
 import Divider from '@mui/material/Divider';
-import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import Typography from '@mui/material/Typography';
 import dayjs from 'dayjs';
+import * as React from 'react';
 
-import { useSelection } from '@/hooks/use-selection';
 
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -26,7 +21,7 @@ function noop(): void {
 }
 
 export interface Product {
-  id:string;
+  id: string;
   title: string;
   image: string;
   name: string;
@@ -52,18 +47,13 @@ export function ProductsTable({
     return rows.map((product) => product.id);
   }, [rows]);
 
-  const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
-
-  const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
-  const selectedAll = rows.length > 0 && selected?.size === rows.length;
-
   return (
     <Card>
       <Box sx={{ overflowX: 'auto' }}>
         <Table sx={{ minWidth: '800px' }}>
           <TableHead>
             <TableRow>
-               <TableCell>S No.</TableCell>
+              <TableCell>S No.</TableCell>
               <TableCell>Title</TableCell>
               <TableCell>Image</TableCell>
               <TableCell>Description</TableCell>
@@ -73,16 +63,12 @@ export function ProductsTable({
           </TableHead>
           <TableBody>
             {rows.map((row) => {
-              const isSelected = selected?.has(row.id);
-
               return (
-                <TableRow hover key={row.id} selected={isSelected}>
-                  
-                  
+                <TableRow hover key={row.id}>
                   <TableCell>{count}</TableCell>
                   <TableCell>{row.title}</TableCell>
                   <TableCell>
-                  <a className='text-sky-600' target="_blank" href={`${BACKEND_URL}/${row.image}`}>Link</a>
+                    <a className='text-pink-700' target="_blank" href={`${BACKEND_URL}/${row.image}`}>Link</a>
                   </TableCell>
                   <TableCell>{row.description}</TableCell>
                   <TableCell> {row.weight} kg</TableCell>

@@ -82,14 +82,13 @@ export async function changeStatusCategory(categoryId: string) {
 
 // #################################### Count APIs ####################################
 
-export async function fetchCount() {
+export async function fetchAdminCount() {
     const response = await authenticatedApiCall("/users/count", "GET");
     if (response.error || !(response.data)) {
         console.error(response.error);
         return []; // or handle the error as needed
     }
     return response.data;
-   
 }
 
 // #################################### Product APIs ####################################
