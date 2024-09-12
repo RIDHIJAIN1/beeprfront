@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
@@ -10,9 +11,10 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import dayjs from 'dayjs';
-import * as React from 'react';
-
-
+import { FaExchangeAlt, FaPencilAlt } from 'react-icons/fa';
+import { MdDelete } from 'react-icons/md';
+import { deleteProduct, updateProduct } from '@/lib/seller/api-calls';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -35,6 +37,11 @@ interface ProductsTableProps {
   page?: number;
   rows?: Product[];
   rowsPerPage?: number;
+  onEditRow?: (row: Product) => void;
+  onDeleteRow?: (row: Product) => void;
+ 
+  
+  
 }
 
 export function ProductsTable({
@@ -42,12 +49,38 @@ export function ProductsTable({
   rows = [],
   page = 0,
   rowsPerPage = 0,
+  onEditRow,
+  onDeleteRow,
+
 }: ProductsTableProps): React.JSX.Element {
+  const [openEditModal, setOpenEditModal] = React.useState(false);
+  const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
+  const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
+
+  const handleEditClick = (product: Product) => {
+    setSelectedProduct(product);
+    setOpenEditModal(true);
+  };
+  
+  const handleDeleteClick = (product: Product) => {
+    setSelectedProduct(product);
+    setOpenDeleteModal(true);
+  };
+  
+  const handleClose = () => {
+    setOpenEditModal(false);
+    setOpenDeleteModal(false);
+    setSelectedProduct(null);
+  };
+  
+
+  updateProduct ;deleteProduct
   const rowIds = React.useMemo(() => {
-    return rows.map((product) => product.id);
+    return rows.map((sellerproduct) => sellerproduct.id);
   }, [rows]);
 
   return (
+    <>
     <Card>
       <Box sx={{ overflowX: 'auto' }}>
         <Table sx={{ minWidth: '800px' }}>
@@ -59,20 +92,37 @@ export function ProductsTable({
               <TableCell>Description</TableCell>
               <TableCell>Weight</TableCell>
               <TableCell>Created At</TableCell>
+              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => {
+            {rows.map((row, index) => {
               return (
                 <TableRow hover key={row.id}>
-                  <TableCell>{count}</TableCell>
+                  <TableCell>{index + 1}</TableCell>
                   <TableCell>{row.title}</TableCell>
                   <TableCell>
-                    <a className='text-pink-700' target="_blank" href={`${BACKEND_URL}/${row.image}`}>Link</a>
+                    <a className="text-pink-700" target="_blank" href={`${BACKEND_URL}/${row.image}`}>
+                      Link
+                    </a>
                   </TableCell>
                   <TableCell>{row.description}</TableCell>
                   <TableCell> {row.weight} kg</TableCell>
                   <TableCell>{dayjs(row.createdAt).format('MMM D, YYYY')}</TableCell>
+                  <TableCell sx={{ fontSize: '30px' }}>
+                  <div className="flex gap-3">
+        <FaPencilAlt
+          title="Edit Category"
+          className="p-2 shadow-md text-blue-500"
+          onClick={() => onEditRow?.(row)} // Optional chaining to avoid undefined error
+        />
+        <MdDelete
+          title="Change Category Status"
+          className="p-1 shadow-md text-red-500"
+          onClick={() => onDeleteRow?.(row)} // Optional chaining
+        />
+      </div>
+                  </TableCell>
                 </TableRow>
               );
             })}
@@ -90,5 +140,9 @@ export function ProductsTable({
         rowsPerPageOptions={[5, 10, 25]}
       />
     </Card>
+  
+
+
+</>
   );
 }

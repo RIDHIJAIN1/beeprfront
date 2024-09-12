@@ -3,6 +3,7 @@
 import { CountCard } from '@/components/dashboard/overview/count-card';
 import { useUser } from '@/hooks/use-user';
 import { fetchAdminCount } from '@/lib/admin/api-calls';
+import { DisapproveSeller, ProductCountBySeller } from '@/lib/seller/api-calls';
 import Grid from '@mui/material/Unstable_Grid2';
 import { ListBullets as ListBulletsIcon } from '@phosphor-icons/react/dist/ssr/ListBullets';
 import { Receipt as ReceiptIcon } from '@phosphor-icons/react/dist/ssr/Receipt';
@@ -20,31 +21,72 @@ export default function Page(): React.JSX.Element {
   // console.log(user);
   let sellerIsApproved = user.role == 'seller' ? ('isApproved' in user ? user.isApproved : "pending") : "";
   const [adminCounts, setAdminCounts] = React.useState({ userCount: 0, sellerCount: 0, productCount: 0 });
+  const [productCounts, setProductCounts] = React.useState({ userCount: 0, sellerCount: 0, productCount: 0 });
   // const [sellerCounts, setSellerCounts] = React.useState({ productCount: 0 });
 
   const loadCount = async () => {
-    if (user.role == 'admin') {
-      const fetchedCount = await fetchAdminCount();
-      if (fetchedCount)
-        setAdminCounts(fetchedCount);
+    // Ensure that the user exists and has a role before proceeding
+    if (!user) return;
+  
+    // Check if the user is an admin and fetch admin counts
+    if (user.role === 'admin') {
+      try {
+        const fetchedCount = await fetchAdminCount();
+        if (fetchedCount) {
+          setAdminCounts(fetchedCount);
+        }
+      } catch (error) {
+        console.error('Failed to fetch admin count:', error);
+      }
     }
-    // if (user.role == 'seller') {
-    //   const fetchedCount = await fetchSellerCount();
-    //   if (fetchedCount)
-    //     setSellerCounts(fetchedCount);
-    // }
+  
+    // Check if the user is an approved seller and fetch product counts by seller
+    if (user.role === 'seller' && user.isApproved) {
+      try {
+        const fetchedCount = await ProductCountBySeller(user.userId);
+        console.log(user)
+        if (fetchedCount) {
+          setProductCounts(fetchedCount);
+        }
+      } catch (error) {
+        console.error('Failed to fetch seller product count:', error);
+      }
+    }
+ 
   };
-
+  
   React.useEffect(() => {
-    loadCount();
-  }, []);
+    // Define async function inside useEffect
+    const fetchCounts = async () => {
+      await loadCount();
+    };
+  
+    fetchCounts();
+  }, [user]); 
 
+
+  
   return (
     <>
       {sellerIsApproved == "pending" ? (
         <div className='container mb-16'>
           <div className='w-full text-center text-red-500'>
             You need to complete your profile first!
+          </div>
+        </div>
+      ) : ""}
+      {sellerIsApproved == "rejected" ? (
+        <div className='container mb-16'>
+          <div className='w-full text-center text-red-500'>
+          {user.message ? user.message : "Your application was rejected."}
+          </div>
+        </div>
+      ) : null}
+
+{sellerIsApproved == "approved" ? (
+        <div className='container mb-16'>
+          <div className='w-full text-center text-red-500'>
+          <CountCard text="Products Listed" value={`${productCounts.productCount}`} icon={<ReceiptIcon fontSize="var(--icon-fontSize-lg)" />} iconBg={'var(--mui-palette-success-main)'} />
           </div>
         </div>
       ) : ""}
