@@ -220,6 +220,7 @@ export default function Page(): React.JSX.Element {
           page={page}
           rows={paginatedCustomers}
           rowsPerPage={rowsPerPage}
+          
         />
       </Stack>
 

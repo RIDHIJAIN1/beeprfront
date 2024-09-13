@@ -3,7 +3,7 @@
 import { CountCard } from '@/components/dashboard/overview/count-card';
 import { useUser } from '@/hooks/use-user';
 import { fetchAdminCount } from '@/lib/admin/api-calls';
-import { DisapproveSeller, ProductCountBySeller } from '@/lib/seller/api-calls';
+import { ProductCountBySeller } from '@/lib/seller/api-calls';
 import Grid from '@mui/material/Unstable_Grid2';
 import { ListBullets as ListBulletsIcon } from '@phosphor-icons/react/dist/ssr/ListBullets';
 import { Receipt as ReceiptIcon } from '@phosphor-icons/react/dist/ssr/Receipt';
@@ -44,7 +44,10 @@ export default function Page(): React.JSX.Element {
     if (user.role === 'seller' && user.isApproved) {
       try {
         const fetchedCount = await ProductCountBySeller(user.userId);
+
         console.log(user)
+        console.log(user.role)
+        console.log(user.city)
         if (fetchedCount) {
           setProductCounts(fetchedCount);
         }
@@ -78,7 +81,8 @@ export default function Page(): React.JSX.Element {
       {sellerIsApproved == "rejected" ? (
         <div className='container mb-16'>
           <div className='w-full text-center text-red-500'>
-          {user.message ? user.message : "Your application was rejected."}
+            <h1 className='pb-5'>PROFILE REJECTED</h1>
+          {user.message}
           </div>
         </div>
       ) : null}
@@ -86,7 +90,9 @@ export default function Page(): React.JSX.Element {
 {sellerIsApproved == "approved" ? (
         <div className='container mb-16'>
           <div className='w-full text-center text-red-500'>
+          <a href="dashboard/products" style={{ textDecoration: 'none' }}>
           <CountCard text="Products Listed" value={`${productCounts.productCount}`} icon={<ReceiptIcon fontSize="var(--icon-fontSize-lg)" />} iconBg={'var(--mui-palette-success-main)'} />
+        </a>
           </div>
         </div>
       ) : ""}
@@ -94,13 +100,24 @@ export default function Page(): React.JSX.Element {
       {user.role == 'admin' ? (
         <Grid container spacing={3}>
           <Grid lg={4} sm={6} xs={12}>
-            <CountCard text="Total Customers" value={`${adminCounts.userCount}`} icon={<UsersIcon fontSize="var(--icon-fontSize-lg)" />} iconBg={'var(--mui-palette-primary-main)'} />
+          <a href="dashboard/customers" style={{ textDecoration: 'none' }}>
+    <CountCard 
+      text="Total Customers" 
+      value={`${adminCounts.userCount}`} 
+      icon={<UsersIcon fontSize="var(--icon-fontSize-lg)" />} 
+      iconBg={'var(--mui-palette-primary-main)'} 
+    />
+  </a>
           </Grid>
           <Grid lg={4} sm={6} xs={12}>
+          <a href="dashboard/sellers" style={{ textDecoration: 'none' }}>
             <CountCard text="Total Sellers" value={`${adminCounts.sellerCount}`} icon={<ListBulletsIcon fontSize="var(--icon-fontSize-lg)" />} iconBg={'var(--mui-palette-warning-main)'} />
+             </a>
           </Grid>
           <Grid lg={4} sm={6} xs={12}>
+          <a href="dashboard/products" style={{ textDecoration: 'none' }}>
             <CountCard text="Products Listed" value={`${adminCounts.productCount}`} icon={<ReceiptIcon fontSize="var(--icon-fontSize-lg)" />} iconBg={'var(--mui-palette-success-main)'} />
+           </a>
           </Grid>
           {/* <Grid lg={3} sm={6} xs={12}>
             <CountCard text="Orders Placed" value="24k+" icon={<CurrencyDollarIcon fontSize="var(--icon-fontSize-lg)" />} iconBg={'var(--mui-palette-primary-main)'} />

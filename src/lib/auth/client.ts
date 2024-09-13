@@ -106,7 +106,7 @@ class AuthClient {
         const errorMessage = response.status === 401 ? "TokenExpired" : data.message || "Something went wrong!!";
         return { data: null, error: errorMessage };
       }
-      return { data: data };
+      return { data: data  , };
     } catch (error) {
       return { data: null, error: "Network error occurred." };
     }

@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { Button, CardActions, Input } from '@mui/material';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -12,7 +13,8 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Select from '@mui/material/Select';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Stack } from '@mui/system';
-import * as React from 'react';
+
+import { useUser } from '@/hooks/use-user';
 
 const states = [
   { value: 'alabama', label: 'Alabama' },
@@ -23,10 +25,11 @@ const states = [
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-
-
 export function AccountDetailsForm(): React.JSX.Element {
-  const [formValues , setFormValues] = React.useState({
+  const { user } = useUser();
+  let sellerCreated = user.role == 'seller' && 'isApproved' in user ? true : false;
+  console.log(user)
+  const [formValues, setFormValues] = React.useState({
     name: '',
     street: '',
     city: '',
@@ -65,26 +68,30 @@ export function AccountDetailsForm(): React.JSX.Element {
     // Create form data object to send
     const formData = new FormData();
 
-    formData.append('street', formValues.street);
-    formData.append('city', formValues.city);
-    formData.append('state', formValues.state);
-    formData.append('zipCode', formValues.zipCode);
-    formData.append('country', formValues.country);
-    formData.append('paymentOption', formValues.paymentOption);
-    if (photoId) formData.append('photoId', photoId);
-    if (cannabisLicense) formData.append('cannabisLicense', cannabisLicense);
-    if (resellersPermit) formData.append('resellersPermit', resellersPermit);
+    Object.keys(formValues).forEach((key) => {
+      formData.append(key, formValues[key]);
+    });
+  // Set file inputs
+  if (photoId) formData.set('photoId', photoId); // Use set to overwrite any existing value
+  if (cannabisLicense) formData.set('cannabisLicense', cannabisLicense); // Use set for single value
+  if (resellersPermit) formData.set('resellersPermit', resellersPermit); // Use set for single value
 
     try {
       let token = localStorage.getItem('auth-access-token');
       if (!token) {
         return { data: null };
       }
-      const response = await fetch(`${BACKEND_URL}/seller`, {       
-        method: 'POST',
-        body:formData,
+
+      // Check if user data exists to determine if it's a POST or PUT request
+      
+      const method = sellerCreated ? 'PATCH' : 'POST';
+      const url = sellerCreated ? `${BACKEND_URL}/seller/${user._id}` : `${BACKEND_URL}/seller`;
+
+      const response = await fetch(url, {
+        method,
+        body: formData,
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -98,10 +105,25 @@ export function AccountDetailsForm(): React.JSX.Element {
       console.error('Failed to submit seller details', error);
     }
   };
+
+  React.useEffect(() => {
+    if (user) {
+      setFormValues({
+        name: user.name || '',
+        street: user.street || '',
+        city: user.city || '',
+        state: user.state || '',
+        zipCode: user.zipCode || '',
+        country: user.country || '',
+        paymentOption: user.paymentOption || '',
+        photoId: user.photoId || '',
+        cannabisLicense: user.cannabisLicense || '',
+        resellersPermit: user.resellersPermit || '',
+      });
+    }
+  }, [user]);
   return (
-    <form
-      onSubmit={handleSubmit}
-    >
+    <form onSubmit={handleSubmit}>
       <Grid container spacing={3}>
         <Grid lg={8} md={6} xs={12}>
           <Card>
@@ -112,12 +134,7 @@ export function AccountDetailsForm(): React.JSX.Element {
                 <Grid md={6} xs={12}>
                   <FormControl fullWidth required>
                     <InputLabel>Name</InputLabel>
-                    <OutlinedInput
-                      value={formValues.name}
-                     onChange={handleInputChange}
-                      label="Name"
-                      name="name"
-                    />
+                    <OutlinedInput value={formValues.name} onChange={handleInputChange} label="Name" name="name" />
                   </FormControl>
                 </Grid>
                 <Grid md={6} xs={12}>
@@ -129,29 +146,18 @@ export function AccountDetailsForm(): React.JSX.Element {
                       label="Street"
                       name="street"
                     />
-
                   </FormControl>
                 </Grid>
                 <Grid md={6} xs={12}>
                   <FormControl fullWidth required>
                     <InputLabel>City</InputLabel>
-                    <OutlinedInput
-                      value={formValues.city}
-                      onChange={handleInputChange}
-                      label="City"
-                      name="city"
-                    />
+                    <OutlinedInput value={formValues.city} onChange={handleInputChange} label="City" name="city" />
                   </FormControl>
                 </Grid>
                 <Grid md={6} xs={12}>
                   <FormControl fullWidth required>
                     <InputLabel>State</InputLabel>
-                    <Select
-                      value={formValues.state}
-                      onChange={handleInputChange}
-                      label="State"
-                      name="state"
-                    >
+                    <Select value={formValues.state} onChange={handleInputChange} label="State" name="state">
                       {states.map((option) => (
                         <MenuItem key={option.value} value={option.value}>
                           {option.label}
@@ -174,12 +180,7 @@ export function AccountDetailsForm(): React.JSX.Element {
                 <Grid md={6} xs={12}>
                   <FormControl fullWidth required>
                     <InputLabel>Country</InputLabel>
-                    <Select
-                      value={formValues.country}
-                      onChange={handleInputChange}
-                      label="Country"
-                      name="country"
-                    >
+                    <Select value={formValues.country} onChange={handleInputChange} label="Country" name="country">
                       <MenuItem value="india">India</MenuItem>
                       <MenuItem value="jndia">dia</MenuItem>
                       {/* Add more country options if needed */}
@@ -207,56 +208,55 @@ export function AccountDetailsForm(): React.JSX.Element {
               </Stack>
             </CardContent>
             <Divider />
-            <CardActions sx={{ justifyContent: 'center' }}>
-            <Input
-                required
+            <CardActions sx={{ position: 'relative', justifyContent: 'center' }}>
+              <Input
                 id="photo-id"
                 name="photoId"
                 type="file"
-                style={{ display: 'none' }}
+                style={{ opacity: 0 }}
                 onChange={handleFileChange}
               />
-              <label htmlFor="photo-id">
+              <label className='w-full' htmlFor="photo-id" style={{ position: 'absolute' }}>
                 <Button fullWidth variant="text" component="span">
                   Photo ID
                 </Button>
               </label>
             </CardActions>
             <Divider />
-            <CardActions sx={{ justifyContent: 'center' }}>
+            <CardActions sx={{ position: 'relative', justifyContent: 'center' }}>
               <Input
-                required
                 id="cannabis-license-upload"
                 name="cannabisLicense"
                 type="file"
-                style={{ display: 'none' }}
+                style={{ opacity: 0 }}
                 onChange={handleFileChange}
               />
-              <label htmlFor="cannabis-license-upload">
+              <label className='w-full' htmlFor="cannabis-license-upload" style={{ position: 'absolute' }}>
                 <Button fullWidth variant="text" component="span">
                   Cannabis License
                 </Button>
               </label>
             </CardActions>
             <Divider />
-            <CardActions sx={{ justifyContent: 'center' }}>
+            <CardActions sx={{ position: 'relative', justifyContent: 'center' }}>
               <Input
-                required
                 id="resellers-permit-upload"
                 name="resellersPermit"
                 type="file"
-                style={{ display: 'none' }}
+                style={{ opacity: 0 }}
                 onChange={handleFileChange}
               />
-              <label htmlFor="resellers-permit-upload">
+              <label className='w-full' htmlFor="resellers-permit-upload" style={{ position: 'absolute' }}>
                 <Button fullWidth variant="text" component="span">
                   Resellers Permit
                 </Button>
               </label>
             </CardActions>
             <Divider />
-            <CardActions sx={{ justifyContent: 'center', margin: "1rem 0" }}>
-              <Button type='submit' variant="contained">Save details</Button>
+            <CardActions sx={{ justifyContent: 'center', margin: '1rem 0' }}>
+              <Button type="submit" variant="contained">
+                Save details
+              </Button>
             </CardActions>
           </Card>
         </Grid>

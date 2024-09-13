@@ -51,6 +51,7 @@ export function ProductsTable({
   rowsPerPage = 0,
   onEditRow,
   onDeleteRow,
+  
 
 }: ProductsTableProps): React.JSX.Element {
   const [openEditModal, setOpenEditModal] = React.useState(false);
@@ -138,6 +139,7 @@ export function ProductsTable({
         page={page}
         rowsPerPage={rowsPerPage}
         rowsPerPageOptions={[5, 10, 25]}
+        
       />
     </Card>
   
