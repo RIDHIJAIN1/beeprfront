@@ -39,11 +39,6 @@ export async function disapproveSeller(selectedSeller: string, message: string) 
 
 }
 
-
-// #################################### Category APIs ####################################
-
-
-
 // #################################### Category APIs ####################################
 export async function fetchCategories() {
     const response = await authenticatedApiCall("/category", "GET");

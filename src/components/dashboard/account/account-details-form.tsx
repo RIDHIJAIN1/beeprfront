@@ -1,6 +1,7 @@
 'use client';
 
-import * as React from 'react';
+import { useUser } from '@/hooks/use-user';
+import type { User } from '@/types/user';
 import { Button, CardActions, Input } from '@mui/material';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -10,11 +11,11 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import OutlinedInput from '@mui/material/OutlinedInput';
+import type { SelectChangeEvent } from '@mui/material/Select';
 import Select from '@mui/material/Select';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Stack } from '@mui/system';
-
-import { useUser } from '@/hooks/use-user';
+import * as React from 'react';
 
 const states = [
   { value: 'alabama', label: 'Alabama' },
@@ -26,9 +27,13 @@ const states = [
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export function AccountDetailsForm(): React.JSX.Element {
-  const { user } = useUser();
+  const { user } = useUser() as { user: User | null };
+  if (!user) {
+    return <div>You must be logged in to view this content.</div>;
+  }
   let sellerCreated = user.role == 'seller' && 'isApproved' in user ? true : false;
-  console.log(user)
+
+  type FormValues = Pick<User, 'name' | 'street' | 'city' | 'state' | 'zipCode' | 'country' | 'paymentOption' | 'photoId' | 'cannabisLicense' | 'resellersPermit'>;
   const [formValues, setFormValues] = React.useState({
     name: '',
     street: '',
@@ -37,12 +42,15 @@ export function AccountDetailsForm(): React.JSX.Element {
     zipCode: '',
     country: '',
     paymentOption: '',
+    photoId: '',
+    cannabisLicense: '',
+    resellersPermit: ''
   });
   const [photoId, setPhotoId] = React.useState<File | null>(null);
   const [cannabisLicense, setCannabisLicense] = React.useState<File | null>(null);
   const [resellersPermit, setResellersPermit] = React.useState<File | null>(null);
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>) => {
     const { name, value } = event.target;
     setFormValues((prevValues) => ({
       ...prevValues,
@@ -68,13 +76,13 @@ export function AccountDetailsForm(): React.JSX.Element {
     // Create form data object to send
     const formData = new FormData();
 
-    Object.keys(formValues).forEach((key) => {
-      formData.append(key, formValues[key]);
+    Object.keys(formValues ).forEach((key) => {
+      formData.append(key, formValues[key as keyof FormValues]);
     });
-  // Set file inputs
-  if (photoId) formData.set('photoId', photoId); // Use set to overwrite any existing value
-  if (cannabisLicense) formData.set('cannabisLicense', cannabisLicense); // Use set for single value
-  if (resellersPermit) formData.set('resellersPermit', resellersPermit); // Use set for single value
+    // Set file inputs
+    if (photoId) formData.set('photoId', photoId); // Use set to overwrite any existing value
+    if (cannabisLicense) formData.set('cannabisLicense', cannabisLicense); // Use set for single value
+    if (resellersPermit) formData.set('resellersPermit', resellersPermit); // Use set for single value
 
     try {
       let token = localStorage.getItem('auth-access-token');
@@ -83,7 +91,7 @@ export function AccountDetailsForm(): React.JSX.Element {
       }
 
       // Check if user data exists to determine if it's a POST or PUT request
-      
+
       const method = sellerCreated ? 'PATCH' : 'POST';
       const url = sellerCreated ? `${BACKEND_URL}/seller/${user._id}` : `${BACKEND_URL}/seller`;
 
@@ -183,7 +191,6 @@ export function AccountDetailsForm(): React.JSX.Element {
                     <Select value={formValues.country} onChange={handleInputChange} label="Country" name="country">
                       <MenuItem value="india">India</MenuItem>
                       <MenuItem value="jndia">dia</MenuItem>
-                      {/* Add more country options if needed */}
                     </Select>
                   </FormControl>
                 </Grid>
