@@ -20,6 +20,9 @@ export default function Page(): React.JSX.Element {
   }
   // console.log(user);
   let sellerIsApproved = user.role == 'seller' ? ('isApproved' in user ? user.isApproved : "pending") : "";
+  let sellerProfileMessage = user.role === 'seller' && !('isApproved' in user) 
+  ? "You need to complete your profile first!" 
+  : null;
   const [adminCounts, setAdminCounts] = React.useState({ userCount: 0, sellerCount: 0, productCount: 0 });
   const [productCounts, setProductCounts] = React.useState({ userCount: 0, sellerCount: 0, productCount: 0 });
   // const [sellerCounts, setSellerCounts] = React.useState({ productCount: 0 });
@@ -71,10 +74,17 @@ export default function Page(): React.JSX.Element {
   
   return (
     <>
+      {sellerProfileMessage ? (
+      <div className='container mb-16'>
+        <div className='w-full text-center text-red-500'>
+          {sellerProfileMessage}
+        </div>
+      </div>
+    ) : null}
       {sellerIsApproved == "pending" ? (
         <div className='container mb-16'>
           <div className='w-full text-center text-red-500'>
-            You need to complete your profile first!
+            Your status is pending
           </div>
         </div>
       ) : ""}
