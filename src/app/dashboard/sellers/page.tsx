@@ -1,5 +1,5 @@
 "use client";
-import { SellersFilters } from '@/components/dashboard/seller/seller-filter';
+import { Filters } from '@/components/dashboard/seller/seller-filter';
 import type { Seller } from '@/components/dashboard/seller/seller-table';
 import { SellersTable } from '@/components/dashboard/seller/seller-table';
 import { fetchSellers } from '@/lib/admin/api-calls';
@@ -10,16 +10,31 @@ import * as React from 'react';
 
 export default function Page(): React.JSX.Element {
     const [sellers, setSellers] = React.useState<Seller[]>([]);
-    const page = 0;
-    const rowsPerPage = 10;
+    const [page, setPage] = React.useState(0);
+    const [rowsPerPage, setRowsPerPage] = React.useState(10);
+    const [totalSellers, setTotalSellers] = React.useState(0);
+    const [ searchTerm , setSearchTerm] = React.useState('');
 
-    const loadSellers = async () => {
-        const fetchedSellers = await fetchSellers();
-        console.log(fetchedSellers); // Check what is being fetched
-        if (Array.isArray(fetchedSellers)) {
-            setSellers(fetchedSellers);
-        } else {
-            console.error("Fetched sellers is not an array", fetchedSellers);
+    const handlePageChange = (event: unknown, newPage: number) => {
+        setPage(newPage);
+      };
+      
+      // Handle Rows per page change
+      const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const value = parseInt(event.target.value, 10);
+        setRowsPerPage(value);
+        setPage(0); // Reset to the first page after changing the number of rows per page
+      };
+
+
+      const loadSellers = async () => {
+        try {
+            const { sellers, total } = await fetchSellers(page + 1, rowsPerPage);
+            console.log(sellers)
+            setSellers(sellers); // Set the fetched users
+            setTotalSellers(total); // Set the total count of customers
+        } catch (error) {
+            console.error("Error loading customers:", error);
         }
     };
     const handleUpdateSellers = async () => {
@@ -28,7 +43,12 @@ export default function Page(): React.JSX.Element {
 
     React.useEffect(() => {
         loadSellers();
-    }, []);
+    }, [ page, rowsPerPage]);
+
+    const filteredSellers = sellers.filter(seller =>
+        seller.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        seller.user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      );
 
     const paginatedCustomers = applyPagination(sellers, page, rowsPerPage);
 
@@ -37,12 +57,14 @@ export default function Page(): React.JSX.Element {
             <Stack direction="row" spacing={3}>
                 <Typography variant="h4">Sellers</Typography>
             </Stack>
-            <SellersFilters />
+            <Filters setSearchTerm={setSearchTerm} />
             <SellersTable
-                count={paginatedCustomers.length}
+                count={totalSellers}
                 page={page}
-                rows={paginatedCustomers}
+                rows={filteredSellers}
                 rowsPerPage={rowsPerPage}
+                onPageChange={handlePageChange}
+                onRowsPerPageChange={handleRowsPerPageChange}
                 updateSellers={handleUpdateSellers}
             />
         </Stack>

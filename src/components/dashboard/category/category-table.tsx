@@ -35,6 +35,10 @@ interface CategoriesTableProps {
   rows?: Category[];
   rowsPerPage?: number;
   updateCategories: () => Promise<void>;
+  onEditRow?: (row: Category) => void;
+  onDeleteRow?: (row: Category) => void;
+  onPageChange: (event: React.MouseEvent |null, page: number) => void;
+  onRowsPerPageChange?: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
 export function CategoriesTable({
@@ -43,6 +47,8 @@ export function CategoriesTable({
   page = 0,
   rowsPerPage = 0,
   updateCategories,
+  onPageChange,
+  onRowsPerPageChange,
 }: CategoriesTableProps): React.JSX.Element {
 
   const [openEditModal, setOpenEditModal] = React.useState(false);
@@ -91,6 +97,7 @@ export function CategoriesTable({
           <Table sx={{ minWidth: '800px' }}>
             <TableHead>
               <TableRow>
+              <TableCell>S No.</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Created At</TableCell>
                 <TableCell>Status</TableCell>
@@ -98,9 +105,10 @@ export function CategoriesTable({
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row) => {
+              {rows.map((row , index) => {
                 return (
                   <TableRow hover key={row.id}>
+                     <TableCell>{index + 1}</TableCell>
                     <TableCell>
                       <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
                         {/* <Avatar src={row.avatar} /> */}
@@ -133,9 +141,9 @@ export function CategoriesTable({
         <TablePagination
           component="div"
           count={count}
-          onPageChange={noop}
-          onRowsPerPageChange={noop}
           page={page}
+          onPageChange={onPageChange}
+          onRowsPerPageChange={onRowsPerPageChange}
           rowsPerPage={rowsPerPage}
           rowsPerPageOptions={[5, 10, 25]}
         />

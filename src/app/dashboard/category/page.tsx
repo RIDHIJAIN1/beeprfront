@@ -11,13 +11,30 @@ import type { Category } from '@/components/dashboard/category/category-table';
 import { CategoriesTable } from '@/components/dashboard/category/category-table';
 import { addCategory, fetchCategories } from '@/lib/admin/api-calls';
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
+import { Filters } from '@/components/dashboard/seller/seller-filter';
 
 // export const metadata = { title: `Categories | Dashboard | ${config.site.name}` } satisfies Metadata;
 
 export default function Page(): React.JSX.Element {
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [open, setOpen] = React.useState(false);
   const [categoryName, setCategoryName] = React.useState('');
+  const [totalcategory, setTotalCategory] = React.useState(0);
+  const [ searchTerm , setSearchTerm] = React.useState('');
+
+  const handlePageChange = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+  
+  // Handle Rows per page change
+  const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const value = parseInt(event.target.value, 10);
+    setRowsPerPage(value);
+    setPage(0); // Reset to the first page after changing the number of rows per page
+  };
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -35,8 +52,9 @@ export default function Page(): React.JSX.Element {
     }
   };
   const loadCategories = async () => {
-    const fetchedCategories = await fetchCategories();
-    setCategories(fetchedCategories);
+    const { categories, total } = await fetchCategories(page + 1, rowsPerPage);
+    setCategories(categories);
+    setTotalCategory(total)
   };
 
   const handleUpdateCategories = async () => {
@@ -45,9 +63,12 @@ export default function Page(): React.JSX.Element {
 
   React.useEffect(() => {
     loadCategories();
-  }, []);
-  const page = 0;
-  const rowsPerPage = 10;
+  }, [ page, rowsPerPage]);
+
+  const filteredCategories = categories.filter(category =>
+    category.name.toLowerCase().includes(searchTerm.toLowerCase()) 
+  );
+ 
   const paginatedCustomers = applyPagination(categories, page, rowsPerPage);
 
   return (
@@ -63,12 +84,14 @@ export default function Page(): React.JSX.Element {
             </Button>
           </div>
         </Stack>
-        <CategoryFilters />
+        <Filters setSearchTerm={setSearchTerm} />
         <CategoriesTable
-          count={paginatedCustomers.length}
+          count={totalcategory} // Use totalProducts for count
           page={page}
-          rows={paginatedCustomers}
           rowsPerPage={rowsPerPage}
+          rows={filteredCategories} // Use the full list of products
+          onPageChange={handlePageChange}
+          onRowsPerPageChange={handleRowsPerPageChange}
           updateCategories={handleUpdateCategories} // Pass the callback
         />
       </Stack>

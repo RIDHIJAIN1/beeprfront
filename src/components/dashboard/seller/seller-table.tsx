@@ -50,6 +50,8 @@ interface SellersTableProps {
     rows?: Seller[];
     rowsPerPage?: number;
     updateSellers: () => Promise<void>;
+    onPageChange: (event: React.MouseEvent |null, page: number) => void;
+    onRowsPerPageChange?: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
 export function SellersTable({
@@ -58,6 +60,8 @@ export function SellersTable({
     page = 0,
     rowsPerPage = 0,
     updateSellers,
+    onPageChange,
+    onRowsPerPageChange,
 }: SellersTableProps): React.JSX.Element {
 
     const rowIds = React.useMemo(() => {
@@ -174,10 +178,11 @@ export function SellersTable({
                 <TablePagination
                     component="div"
                     count={count}
-                    onPageChange={noop}
-                    onRowsPerPageChange={noop}
                     page={page}
                     rowsPerPage={rowsPerPage}
+                    onPageChange={onPageChange}
+                    onRowsPerPageChange={onRowsPerPageChange}
+                 
                     rowsPerPageOptions={[5, 10, 25]}
                 />
             </Card>

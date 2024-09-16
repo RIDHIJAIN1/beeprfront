@@ -40,6 +40,8 @@ interface CustomersTableProps {
   page?: number;
   rows?: Customer[];
   rowsPerPage?: number;
+  onPageChange: (event: React.MouseEvent |null, page: number) => void;
+  onRowsPerPageChange?: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 
 }
 
@@ -48,6 +50,9 @@ export function CustomersTable({
   rows = [],
   page = 0,
   rowsPerPage = 0,
+  onPageChange,
+  onRowsPerPageChange,
+  
 }: CustomersTableProps): React.JSX.Element {
   const rowIds = React.useMemo(() => {
     return rows.map((customer) => customer.id);
@@ -64,6 +69,7 @@ export function CustomersTable({
         <Table sx={{ minWidth: '800px' }}>
           <TableHead>
             <TableRow>
+             
               <TableCell>Name</TableCell>
               <TableCell>Email</TableCell>
               <TableCell>Signed Up</TableCell>
@@ -100,8 +106,8 @@ export function CustomersTable({
       <TablePagination
         component="div"
         count={count}
-        onPageChange={noop}
-        onRowsPerPageChange={noop}
+        onPageChange={onPageChange}
+        onRowsPerPageChange={onRowsPerPageChange}
         page={page}
         rowsPerPage={rowsPerPage}
         rowsPerPageOptions={[5, 10, 25]}

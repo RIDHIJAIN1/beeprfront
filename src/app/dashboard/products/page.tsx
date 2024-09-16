@@ -14,16 +14,34 @@ import { Category } from '@/components/dashboard/category/category-table';
 import { ProductFilters } from '@/components/dashboard/product/product-filter';
 import type { Product } from '@/components/dashboard/product/product-table';
 import { ProductsTable } from '@/components/dashboard/product/product-table';
+import { Filters } from '@/components/dashboard/seller/seller-filter';
 
 export default function Page(): React.JSX.Element {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   const { user } = useUser();
   const [open, setOpen] = React.useState(false);
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [isEditMode, setIsEditMode] = React.useState(false);
   const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
+  const [products, setProducts] = React.useState<Product[]>([]);
+  const [totalProducts, setTotalProducts] = React.useState(0); // Track total products
+  const [totalcategory, setTotalCategory] = React.useState(0);
+  const [ searchTerm , setSearchTerm] = React.useState('');
+
+  const handlePageChange = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+  
+  // Handle Rows per page change
+  const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const value = parseInt(event.target.value, 10);
+    setRowsPerPage(value);
+    setPage(0); // Reset to the first page after changing the number of rows per page
+  };
 
   const [formData, setFormData] = React.useState({
     title: '',
@@ -36,8 +54,9 @@ export default function Page(): React.JSX.Element {
   const [image, setImage] = React.useState<File | null>(null);
 
   const loadCategories = async () => {
-    const fetchedCategories = await fetchCategories();
-    setCategories(fetchedCategories);
+    const { categories, total } = await fetchCategories(page + 1, rowsPerPage);
+    setCategories(categories);
+    setTotalCategory(total)
   };
 
   const handleEditClick = (product: Product) => {
@@ -87,6 +106,8 @@ export default function Page(): React.JSX.Element {
     }
   };
 
+
+
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
@@ -118,23 +139,16 @@ export default function Page(): React.JSX.Element {
     // Create FormData object to send as multipart/form-data
     const formToSubmit = new FormData();
 
-    // Append form data from the state to FormData
     formToSubmit.append('title', formData.title);
     formToSubmit.append('description', formData.description);
     formToSubmit.append('deliveryOption', formData.deliveryOption);
     formToSubmit.append('weight', formData.weight);
     formToSubmit.append('categoryId', formData.category); // Assuming category holds the ID
 
-    // Append image if it exists
     if (image) formToSubmit.append('image', image);
     console.log('Form Data before submitting:', formData);
 
-    for (let [key, value] of formToSubmit.entries()) {
-      console.log(key, value);
-    }
-
     try {
-      // Fetch the auth token from localStorage
       let token = localStorage.getItem('auth-access-token');
       if (!token) {
         console.error('User not authenticated. No token found.');
@@ -142,7 +156,7 @@ export default function Page(): React.JSX.Element {
       }
 
       const url = isEditMode
-        ? `${BACKEND_URL}/product/${selectedProduct.id}` // For update
+        ? `${BACKEND_URL}/product/${selectedProduct?.id}` // For update
         : `${BACKEND_URL}/product`; // For create
 
       const method = isEditMode ? 'PATCH' : 'POST';
@@ -161,7 +175,6 @@ export default function Page(): React.JSX.Element {
       }
 
       setOpen(false);
-      // Reload product list or update state
     } catch (error) {
       console.error('Failed to submit product details', error);
     }
@@ -173,26 +186,31 @@ export default function Page(): React.JSX.Element {
 
   let sellerIsApproved = user.role === 'seller' ? (user.isApproved ? user.isApproved : 'pending') : '';
 
-  const [products, setProducts] = React.useState<Product[]>([]);
 
   React.useEffect(() => {
     loadCategories();
     const loadProducts = async () => {
       if (user.role === 'admin') {
-        const fetchedProducts = await fetchProducts();
-        setProducts(fetchedProducts);
+        const { products, total } = await fetchProducts(page + 1, rowsPerPage); // API expects page to be 1-based
+        setProducts(products);
+        setTotalProducts(total);
       } else if (user.role === 'seller' && sellerIsApproved === 'approved') {
-        const fetchedSellerProducts = await getProductsById(user.userId); // Use user._id as sellerId
-        setProducts(fetchedSellerProducts);
+        const fetchedSellerProducts = await getProductsById(user.userId);
+      setProducts(fetchedSellerProducts);
+      setTotalProducts(fetchedSellerProducts.length); // Assuming all seller products are fetched
       }
     };
 
     loadProducts();
-  }, [user, sellerIsApproved]);
+  }, [user, sellerIsApproved , page, rowsPerPage]);
+
+  const filteredProducts = products.filter(product =>
+    product.title.toLowerCase().includes(searchTerm.toLowerCase()) 
+  );
 
   // Pagination logic
-  const page = 0;
-  const rowsPerPage = 10;
+  // const page = 0;
+  // const rowsPerPage = 10;
   const paginatedCustomers = applyPagination(products, page, rowsPerPage);
 
   return (
@@ -212,15 +230,16 @@ export default function Page(): React.JSX.Element {
             </Button>
           </div>
         </Stack>
-        <ProductFilters />
+        <Filters setSearchTerm={setSearchTerm} />
         <ProductsTable
           onEditRow={handleEditClick}
           onDeleteRow={handleDeleteClick}
-          count={paginatedCustomers.length}
+          count={totalProducts} // Use totalProducts for count
           page={page}
-          rows={paginatedCustomers}
           rowsPerPage={rowsPerPage}
-          
+          rows={filteredProducts} // Use the full list of products
+          onPageChange={handlePageChange}
+          onRowsPerPageChange={handleRowsPerPageChange}
         />
       </Stack>
 
@@ -325,5 +344,5 @@ export default function Page(): React.JSX.Element {
 }
 
 function applyPagination(items: Product[], page: number, rowsPerPage: number) {
-  return items.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  return items.slice(page * rowsPerPage, (page + 1) * rowsPerPage); // Adjusted end slice
 }
